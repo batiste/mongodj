@@ -6,11 +6,14 @@ Replace these with more appropriate tests for your application.
 """
 
 from django.test import TestCase
+from mongodj.test.myapp.models import Entry, Blog
 
 class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Fail test
-        """
-        self.failUnlessEqual(1 + 1, 3)
-
+    
+    def test_add_entry(self):
+        blog1 = Blog(title="blog1")
+        blog1.save()
+        self.assertEqual(Blog.objects.count(), 1)
+        blog2 = Blog(title="blog2")
+        blog2.save()
+        self.assertEqual(Blog.objects.count(), 2)

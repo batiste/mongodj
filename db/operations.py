@@ -4,6 +4,10 @@ from pymongo.objectid import ObjectId
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = 'mongodj.db.compiler'
 
+    def __init__(self, database_wrapper):
+        super(DatabaseOperations, self).__init__()
+        self.database = database_wrapper
+
     def quote_name(self, name):
         return name
 
@@ -13,8 +17,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         return value
 
     def sql_flush(self, style, tables, sequence_list):
-        # TODO - flush the table
-        return []
+        # TODO - flush the tables
+        # drop_collection
+        for table in tables:
+            print "Drop collection %s" % table
+            self.database.db_connection.drop_collection(table)
+        return tables
 
     def value_to_db_datetime(self, value):
         # value is a datetime here, no need to check it
