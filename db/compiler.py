@@ -101,7 +101,7 @@ class SQLCompiler(SQLCompiler):
         query = query or {}
         where = where or self.query.where
         if where.connector == OR:
-            raise NotImplementedError("OR- queries not supported yet")
+            raise NotImplementedError("OR queries not supported yet.")
         for child in where.children:
             if isinstance(child, (list, tuple)):
                 lookup_type, collection, column, db_type, value = \
@@ -129,8 +129,19 @@ class SQLCompiler(SQLCompiler):
         _high_limit = self.query.high_mark or 0
         _low_limit = self.query.low_mark or 0
         query = self._get_query()
+        
+        results = self._get_collection().find(query).skip(_low_limit).limit(
+            _high_limit - _low_limit)
 
-        return self._get_collection().find(query).skip(_low_limit).limit(_high_limit - _low_limit)
+        if self.query.order_by:
+            sort_list = []
+            for order in self.query.order_by:
+                if order.startswith('-'):
+                    sort_list.append((order[1:], pymongo.DESCENDING))
+                else:
+                    sort_list.append((order, pymongo.ASCENDING))
+            results = results.sort(sort_list)
+        return results
 
     """
     API used by Django

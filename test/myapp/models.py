@@ -32,7 +32,8 @@ class Entry(models.Model):
     _id = StringAutoField(max_length=100, primary_key=True)
     title = models.CharField(max_length=200)
     content = models.CharField(max_length=1000)
-    blog = models.ForeignKey(Blog)
+    date_published = models.DateTimeField()
+    #blog = models.ForeignKey(Blog)
     
     def __unicode__(self):
-        return "Entry: %s in the blog '%s'" % (self.title, self.blog)
+        return "Entry: %s" % (self.title)

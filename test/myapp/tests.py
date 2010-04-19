@@ -1,12 +1,10 @@
 """
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
-
-Replace these with more appropriate tests for your application.
+Test suite for mangodj.
 """
 
 from django.test import TestCase
 from mongodj.test.myapp.models import Entry, Blog
+import datetime
 
 class SimpleTest(TestCase):
     
@@ -64,5 +62,27 @@ class SimpleTest(TestCase):
         blog1.title = "new title"
         blog1.save()
         self.assertEqual(Blog.objects.count(), 1)
+        self.assertEqual(blog1.title, Blog.objects.all()[0].title)
 
+    def test_dates(self):
+        now = datetime.datetime.now()
+        before = now - datetime.timedelta(days=1)
         
+        entry1 = Entry(title="entry 1", date_published=now)
+        entry1.save()
+
+        entry2 = Entry(title="entry 2", date_published=before)
+        entry2.save()
+
+        print [(e.pk, e.date_published) for e in Entry.objects.order_by('published_date')]
+    
+        self.assertEqual(
+            list(Entry.objects.order_by('-published_date')),
+            [entry1, entry2]
+        )
+
+        self.assertEqual(
+            list(Entry.objects.order_by('published_date')),
+            [entry2, entry1]
+        )
+
