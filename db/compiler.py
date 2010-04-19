@@ -4,6 +4,7 @@ import sys
 import pymongo
 from pymongo.objectid import ObjectId
 
+from django.db import models
 from django.db.models.sql import aggregates as sqlaggregates
 from django.db.models.sql.compiler import SQLCompiler
 from django.db.models.sql import aggregates as sqlaggregates
@@ -171,12 +172,17 @@ class SQLInsertCompiler(SQLCompiler):
         """
         dat = {}
         for (field, value), column in zip(self.query.values, self.query.columns):
-            dat[column] = python2db(field.db_type(connection=self.connection), value)
+            if value == None and field.null == True:
+                #dat[column] = None
+                pass
+            else:
+                dat[column] = python2db(field.db_type(connection=self.connection), value)
         # every object should have a unique pk
         if not dat.has_key('_id'):
             # TODO: maybe the pk name should be retrieved from the model
             dat['_id'] = str(ObjectId())
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
+        
         if return_id:
             return dat['_id']
 

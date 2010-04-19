@@ -20,6 +20,28 @@ class StringAutoField(models.AutoField):
         except (TypeError, ValueError):
             raise exceptions.ValidationError(self.error_messages['invalid'])
 
+class StringForeignKey(models.ForeignKey):
+
+    default_error_messages = {
+        'invalid': _(u'This value must be an string.'),
+    }
+
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        return str(value)
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        try:
+            return str(value)
+        except (TypeError, ValueError):
+            raise exceptions.ValidationError(self.error_messages['invalid'])
+
+    def db_type(self, connection):
+        return unicode
+
 
 class Blog(models.Model):
     _id = StringAutoField(max_length=100, primary_key=True)
@@ -33,7 +55,7 @@ class Entry(models.Model):
     title = models.CharField(max_length=200)
     content = models.CharField(max_length=1000)
     date_published = models.DateTimeField()
-    #blog = models.ForeignKey(Blog)
+    blog = StringForeignKey(Blog, null=True, blank=True)
     
     def __unicode__(self):
         return "Entry: %s" % (self.title)

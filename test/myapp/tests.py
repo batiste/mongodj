@@ -89,7 +89,7 @@ class SimpleTest(TestCase):
         now = datetime.datetime.now()
         before = now + datetime.timedelta(days=1)
         after = now - datetime.timedelta(days=1)
-
+        
         entry1 = Entry(title="entry 1", date_published=now)
         entry1.save()
 
@@ -100,6 +100,10 @@ class SimpleTest(TestCase):
         entry3.save()
 
         self.assertEqual(
+            list(Entry.objects.filter(date_published=now)),
+            [entry1]
+        )
+        self.assertEqual(
             list(Entry.objects.filter(date_published__lt=now)),
             [entry3]
         )
@@ -107,3 +111,20 @@ class SimpleTest(TestCase):
             list(Entry.objects.filter(date_published__gt=now)),
             [entry2]
         )
+
+    def test_simple_foreign_keys(self):
+        now = datetime.datetime.now()
+
+        blog1 = Blog(title="Blog")
+        blog1.save()
+        entry1 = Entry(title="entry 1", blog=blog1)
+        entry1.save()
+        entry2 = Entry(title="entry 2", blog=blog1)
+        entry2.save()
+
+        for entry in Entry.objects.all():
+            self.assertEqual(
+                blog1,
+                entry.blog
+            )
+
