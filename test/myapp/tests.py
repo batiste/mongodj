@@ -73,16 +73,14 @@ class SimpleTest(TestCase):
 
         entry2 = Entry(title="entry 2", date_published=before)
         entry2.save()
-
-        print [(e.pk, e.date_published) for e in Entry.objects.order_by('published_date')]
     
         self.assertEqual(
-            list(Entry.objects.order_by('-published_date')),
+            list(Entry.objects.order_by('-date_published')),
             [entry1, entry2]
         )
 
         self.assertEqual(
-            list(Entry.objects.order_by('published_date')),
+            list(Entry.objects.order_by('date_published')),
             [entry2, entry1]
         )
 

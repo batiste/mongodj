@@ -16,10 +16,12 @@ from django.db.models.sql.where import WhereNode
 from django.conf import settings
 
 TYPE_MAPPING = {
-    "unicode":  lambda val: unicode(val),
-    "int":      lambda val: int(val),
-    "float":    lambda val: float(val),
-    "bool":     lambda val: bool(val),
+    'unicode':  lambda val: unicode(val),
+    'int':      lambda val: int(val),
+    'float':    lambda val: float(val),
+    'bool':     lambda val: bool(val),
+    # TODO - get rid of this?
+    'objectid': lambda val: ObjectId(val),
 }
 
 OPERATORS_MAP = {
@@ -28,14 +30,12 @@ OPERATORS_MAP = {
     'gte':      lambda val: {"$gte": val},
     'lt':       lambda val: {"$lt": val},
     'lte':      lambda val: {"$lte": val},
-    'in':       lambda val: {"$in": val}
+    'in':       lambda val: {"$in": val},
 }
 
-def _get_mapping(db_type, value, mapping):
+def _get_mapping(db_type, value):
     # TODO - comments. lotsa comments
-    if db_type in mapping:
-        _func = mapping[db_type]
-    elif db_type in TYPE_MAPPING:
+    if db_type in TYPE_MAPPING:
         _func = TYPE_MAPPING[db_type]
     else:
         _func = lambda val: val
@@ -45,17 +45,10 @@ def _get_mapping(db_type, value, mapping):
     return _func(value)
     
 def python2db(db_type, value):
-    mapping = {
-        # TODO - get rid of dirty dirty hack
-        "objectid": lambda val: ObjectId(val),
-    }
-    return _get_mapping(db_type, value, mapping)
+    return _get_mapping(db_type, value)
     
 def db2python(db_type, value):
-    mapping = {
-        "objectid": lambda val: val,
-    }
-    return _get_mapping(db_type, value, mapping)
+    return _get_mapping(db_type, value)
     
 def _parse_constraint(where_child, connection):
     _constraint, lookup_type, _annotation, value = where_child
