@@ -38,3 +38,31 @@ class SimpleTest(TestCase):
             Blog.objects.get(title="blog1"),
             blog1
         )
+
+    def test_simple_filter(self):
+        blog1 = Blog(title="same title")
+        blog1.save()
+        blog2 = Blog(title="same title")
+        blog2.save()
+        blog3 = Blog(title="another title")
+        blog3.save()
+        self.assertEqual(Blog.objects.count(), 3)
+        self.assertEqual(Blog.objects.get(pk=blog1.pk), blog1)
+        self.assertEqual(
+            Blog.objects.filter(title="same title").count(),
+            2
+        )
+        self.assertEqual(
+            Blog.objects.filter(title="same title", pk=blog1.pk).count(),
+            1
+        )
+
+    def test_change_model(self):
+        blog1 = Blog(title="blog 1")
+        blog1.save()
+        self.assertEqual(Blog.objects.count(), 1)
+        blog1.title = "new title"
+        blog1.save()
+        self.assertEqual(Blog.objects.count(), 1)
+
+        

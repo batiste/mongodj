@@ -17,10 +17,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         return value
 
     def sql_flush(self, style, tables, sequence_list):
-        # TODO - flush the tables
-        # drop_collection
         for table in tables:
-            print "Drop collection %s" % table
             self.database.db_connection.drop_collection(table)
         return tables
 

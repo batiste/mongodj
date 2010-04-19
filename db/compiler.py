@@ -129,6 +129,7 @@ class SQLCompiler(SQLCompiler):
         _high_limit = self.query.high_mark or 0
         _low_limit = self.query.low_mark or 0
         query = self._get_query()
+
         return self._get_collection().find(query).skip(_low_limit).limit(_high_limit - _low_limit)
 
     """
@@ -168,8 +169,9 @@ class SQLInsertCompiler(SQLCompiler):
         for (field, value), column in zip(self.query.values, self.query.columns):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
         # every object should have a unique pk
-        # TODO: this pk name should be retrieved from the model
-        dat['_id'] = str(ObjectId())
+        if not dat.has_key('_id'):
+            # TODO: maybe the pk name should be retrieved from the model
+            dat['_id'] = str(ObjectId())
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
         if return_id:
             return dat['_id']
