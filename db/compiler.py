@@ -18,6 +18,7 @@ TYPE_MAPPING = {
     "unicode":  lambda val: unicode(val),
     "int":      lambda val: int(val),
     "float":    lambda val: float(val),
+    "bool":     lambda val: bool(val),
 }
 
 OPERATORS_MAP = {
@@ -31,7 +32,12 @@ OPERATORS_MAP = {
 
 def _get_mapping(db_type, value, mapping):
     # TODO - comments. lotsa comments
-    _func = mapping[db_type] if db_type in mapping else TYPE_MAPPING[db_type]
+    if db_type in mapping:
+        _func = mapping[db_type]
+    elif db_type in TYPE_MAPPING:
+        _func = TYPE_MAPPING[db_type]
+    else:
+        _func = lambda val: val
     # TODO - what if the data is represented as list on the python side?
     if isinstance(value, list):
         return map(_func, value)
@@ -40,13 +46,13 @@ def _get_mapping(db_type, value, mapping):
 def python2db(db_type, value):
     mapping = {
         # TODO - get rid of dirty dirty hack
-        "objectid": lambda val: ObjectId(val),  
+        "objectid": lambda val: ObjectId(val),
     }
     return _get_mapping(db_type, value, mapping)
     
 def db2python(db_type, value):
     mapping = {
-        "objectid": lambda val: val,  
+        "objectid": lambda val: val,
     }
     return _get_mapping(db_type, value, mapping)
     
@@ -92,7 +98,7 @@ class SQLCompiler(SQLCompiler):
     
     def _get_query(self):
         # TODO - OR queries
-        query = {}        
+        query = {}
         where = self.query.where
         if where.connector == OR:
             raise NotImplementedError("OR- queries not supported yet")
@@ -123,7 +129,7 @@ class SQLCompiler(SQLCompiler):
         defined by self.query
         """
         _high_limit = self.query.high_mark or 0
-        _low_limit = self.query.low_mark or 0        
+        _low_limit = self.query.low_mark or 0
 
         return self._get_collection().find(self._get_query()).skip(_low_limit).limit(_high_limit - _low_limit)
 
@@ -155,21 +161,20 @@ class SQLCompiler(SQLCompiler):
         return self.get_count() > 0
                         
 class SQLInsertCompiler(SQLCompiler):
+    
     def execute_sql(self, return_id=False):
         """
         self.query - the data that should be inserted
         """
         dat = {}
         for (field, value), column in zip(self.query.values, self.query.columns):
-            # TODO - prettier version? check whether it is PK?
-            # insert
-            if column == "_id" and value == None: 
-                continue
             dat[column] = python2db(field.db_type(connection=self.connection), value)
+        # every object should have a pk
+        dat['id'] = str(ObjectId())
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
 class SQLUpdateCompiler(SQLCompiler):
-    # TODO 
+    # TODO
     pass
 
 class SQLDeleteCompiler(SQLCompiler):

@@ -14,6 +14,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     distinguishes_insert_from_update = False
     supports_deleting_related_objects = False
     supports_multi_table_inheritance = False
+    can_return_id_from_insert = True
 
 class DatabaseClient(BaseDatabaseClient):
     pass
@@ -27,6 +28,10 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         Show defined models
         """
         return self.django_table_names()
+
+    def sequence_list(self):
+        # TODO: check if it's necessary to implement that
+        pass
         
 class CursorWrapper():
     """
@@ -37,11 +42,23 @@ class CursorWrapper():
         self.conn = conn
         self.db_name = NAME
         self.db = conn[NAME]
+
+    def execute(self, query, args=None):
+        print query
         
     def commit(self, *args, **kw):
         # TODO - what is the state of 
         # transaction support in mongo?
         return True
+
+    def rollback(self):
+        pass
+
+    def fetchone(self):
+        return {"test":1}
+
+    def sql_flush(self):
+        pass
         
     def close(self):
         # TODO
@@ -51,6 +68,8 @@ class CursorWrapper():
     
     def __getattr__(self, attr):
         if not attr in self.__dict__:
+            print "Found %s" % attr
+            print type(getattr(self.db, attr))
             return getattr(self.db, attr)
         self.__dict__[attr]
         

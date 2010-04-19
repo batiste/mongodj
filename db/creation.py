@@ -25,7 +25,12 @@ class DatabaseCreation(BaseDatabaseCreation):
         'PositiveSmallIntegerField':    'int',
         'BigIntegerField':              'int',
         'GenericAutoField':             'objectid',
+        'AutoField':                    'objectid',
         'OneToOneField':                'int',
         'DecimalField':                 'float',
     }
     
+
+    def set_autocommit(self):
+        "Make sure a connection is in autocommit mode."
+        pass
