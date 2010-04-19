@@ -64,7 +64,7 @@ class SimpleTest(TestCase):
         self.assertEqual(Blog.objects.count(), 1)
         self.assertEqual(blog1.title, Blog.objects.all()[0].title)
 
-    def test_dates(self):
+    def test_dates_ordering(self):
         now = datetime.datetime.now()
         before = now - datetime.timedelta(days=1)
         
@@ -84,3 +84,26 @@ class SimpleTest(TestCase):
             [entry2, entry1]
         )
 
+
+    def test_dates_less_and_more_than(self):
+        now = datetime.datetime.now()
+        before = now + datetime.timedelta(days=1)
+        after = now - datetime.timedelta(days=1)
+
+        entry1 = Entry(title="entry 1", date_published=now)
+        entry1.save()
+
+        entry2 = Entry(title="entry 2", date_published=before)
+        entry2.save()
+
+        entry3 = Entry(title="entry 3", date_published=after)
+        entry3.save()
+
+        self.assertEqual(
+            list(Entry.objects.filter(date_published__lt=now)),
+            [entry3]
+        )
+        self.assertEqual(
+            list(Entry.objects.filter(date_published__gt=now)),
+            [entry2]
+        )
