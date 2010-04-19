@@ -169,9 +169,12 @@ class SQLInsertCompiler(SQLCompiler):
         dat = {}
         for (field, value), column in zip(self.query.values, self.query.columns):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
-        # every object should have a pk
-        dat['id'] = str(ObjectId())
+        # every object should have a unique pk
+        # TODO: this pk name should be retrieved from the model
+        dat['_id'] = str(ObjectId())
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
+        if return_id:
+            return dat['_id']
 
 class SQLUpdateCompiler(SQLCompiler):
     # TODO
