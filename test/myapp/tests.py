@@ -29,4 +29,12 @@ class SimpleTest(TestCase):
         blog1.save()
         blog2 = Blog(title="blog2")
         blog2.save()
-        self.assertEqual(Blog.objects.get(title="blog1"), 1)
+        self.assertEqual(Blog.objects.count(), 2)
+        self.assertEqual(
+            Blog.objects.get(title="blog2"),
+            blog2
+        )
+        self.assertEqual(
+            Blog.objects.get(title="blog1"),
+            blog1
+        )

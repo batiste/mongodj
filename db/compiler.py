@@ -11,6 +11,7 @@ from django.db.models.sql.constants import LOOKUP_SEP, MULTI, SINGLE
 from django.db.models.sql.where import AND, OR
 from django.db.utils import DatabaseError, IntegrityError
 from django.utils.tree import Node
+from django.db.models.sql.where import WhereNode
 
 from django.conf import settings
 
@@ -96,21 +97,18 @@ class SQLCompiler(SQLCompiler):
         elif result_type is MULTI:
             return [[count]]
     
-    def _get_query(self):
-        # TODO - OR queries
-        query = {}
-        where = self.query.where
+    def _get_query(self, query=None, where=None):
+        query = query or {}
+        where = where or self.query.where
         if where.connector == OR:
             raise NotImplementedError("OR- queries not supported yet")
-               
         for child in where.children:
-            if isinstance(child, tuple):
-                # only one level of hierarchy for now
-                # TODO - proper way, but for now - since there are no joins "table_alias" should be the same as the table name
-                
-                lookup_type, collection, column, db_type, value = _parse_constraint(child, self.connection)
+            if isinstance(child, (list, tuple)):
+                lookup_type, collection, column, db_type, value = \
+                    _parse_constraint(child, self.connection)
                 query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
-        
+            elif isinstance(child, WhereNode):
+                query = self._get_query(query=query, where=child)
         return query
     
     def _get_collection(self):
@@ -130,8 +128,8 @@ class SQLCompiler(SQLCompiler):
         """
         _high_limit = self.query.high_mark or 0
         _low_limit = self.query.low_mark or 0
-
-        return self._get_collection().find(self._get_query()).skip(_low_limit).limit(_high_limit - _low_limit)
+        query = self._get_query()
+        return self._get_collection().find(query).skip(_low_limit).limit(_high_limit - _low_limit)
 
     """
     API used by Django
