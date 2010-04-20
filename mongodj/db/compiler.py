@@ -176,19 +176,29 @@ class SQLInsertCompiler(SQLCompiler):
         self.query - the data that should be inserted
         """
         dat = {}
-        for (field, value), column in zip(self.query.values, self.query.columns):
-            dat[column] = python2db(field.db_type(connection=self.connection), value)
-        # every object should have a unique pk
         pk_field = self.query.model._meta.pk
         pk_name = pk_field.attname
+        #pk_value = None
+        
+        for (field, value), column in zip(self.query.values, self.query.columns):
+            #if pk_name == field.attname:
+            #    pk_value = value
+            dat[column] = python2db(field.db_type(connection=self.connection), value)
+
+        # every object should have a unique pk
         if not dat.has_key(pk_name):
-            if isinstance(pk_field, StringAutoField):
+            if isinstance(pk_field, (models.CharField, StringAutoField)):
                 dat[pk_name] = str(ObjectId())
             else:
                 # create a random, hopefully unique 64 bits value
                 import random
                 dat[pk_name] = str(random.getrandbits(64))
-
+        elif isinstance(pk_field, (models.CharField)):
+            # if the Primary key is a charfield, and the value is provided.
+            # we have an issue because it not possible to ensure uniqueness.
+            # so I try to use a objectid instead even if it's incorrect.
+            dat[pk_name] = str(ObjectId())
+                
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:
