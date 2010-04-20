@@ -49,7 +49,8 @@ class Blog(models.Model):
     
     def __unicode__(self):
         return "Blog: %s" % self.title
-    
+
+
 class Entry(models.Model):
     _id = StringAutoField(max_length=100, primary_key=True)
     title = models.CharField(max_length=200)
@@ -59,3 +60,11 @@ class Entry(models.Model):
     
     def __unicode__(self):
         return "Entry: %s" % (self.title)
+
+
+class StandardAutoFieldModel(models.Model):
+    _id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=200)
+    
+    def __unicode__(self):
+        return "Standard model: %s" % (self.title)

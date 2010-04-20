@@ -3,7 +3,7 @@ Test suite for mangodj.
 """
 
 from django.test import TestCase
-from testproj.myapp.models import Entry, Blog
+from testproj.myapp.models import Entry, Blog, StandardAutoFieldModel
 import datetime
 
 class MongoDjTest(TestCase):
@@ -149,4 +149,22 @@ class MongoDjTest(TestCase):
             # this should work too
             list(Entry.objects.filter(blog=blog1)),
             [entry1]
+        )
+
+    def test_standard_autofield(self):
+
+        sam1 = StandardAutoFieldModel(title="title 1")
+        sam1.save()
+        sam2 = StandardAutoFieldModel(title="title 2")
+        sam2.save()
+
+        self.assertEqual(
+            StandardAutoFieldModel.objects.count(),
+            2
+        )
+
+        sam1_query = StandardAutoFieldModel.objects.get(title="title 1")
+        self.assertEqual(
+            sam1_query.pk,
+            sam1.pk
         )
