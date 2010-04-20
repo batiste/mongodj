@@ -48,6 +48,9 @@ def _get_mapping(db_type, value):
     return _func(value)
     
 def python2db(db_type, value):
+    # mongodb only handle 8 bit number
+    if isinstance(value, (int, float, long)):
+        return str(value)
     return _get_mapping(db_type, value)
     
 def db2python(db_type, value):
@@ -185,7 +188,7 @@ class SQLInsertCompiler(SQLCompiler):
                 # create a random, hopefully unique 64 bits value
                 import random
                 dat[pk_name] = str(random.getrandbits(64))
-                
+
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:

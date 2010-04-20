@@ -171,4 +171,17 @@ class MongoDjTest(TestCase):
 
         sam1_query = StandardAutoFieldModel.objects.get(pk=sam1.pk)
         #sam1_query = StandardAutoFieldModel.objects.get(pk=sam1) ??is valid???
-        
+
+
+    def test_session_backend(self):
+        from django.contrib.sessions.backends.db import SessionStore
+        from django.contrib.sessions.models import Session
+        store = SessionStore()
+        self.assertFalse(store.exists('toto'))
+        self.assertFalse(store.exists(store.session_key))
+        self.assertEqual(Session.objects.count(), 0)
+        store.load()
+        self.assertTrue(store.exists(store.session_key))
+        self.assertEqual(Session.objects.count(), 1)
+
+        #TODO: find what create the MultipleObjectsReturned error
