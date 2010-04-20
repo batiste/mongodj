@@ -170,5 +170,5 @@ class MongoDjTest(TestCase):
         )
 
         sam1_query = StandardAutoFieldModel.objects.get(pk=sam1.pk)
-        sam1_query = StandardAutoFieldModel.objects.get(pk=sam1)
+        #sam1_query = StandardAutoFieldModel.objects.get(pk=sam1) ??is valid???
         
