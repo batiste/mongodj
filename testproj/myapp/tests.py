@@ -54,6 +54,34 @@ class MongoDjTest(TestCase):
             Blog.objects.filter(title="same title", pk=blog1.pk).count(),
             1
         )
+        self.assertEqual(
+            Blog.objects.filter(title__startswith="same").count(),
+            2
+        )
+        self.assertEqual(
+            Blog.objects.filter(title__istartswith="SAME").count(),
+            2
+        )
+        self.assertEqual(
+            Blog.objects.filter(title__endswith="title").count(),
+            3
+        )
+        self.assertEqual(
+            Blog.objects.filter(title__iendswith="Title").count(),
+            3
+        )
+        self.assertEqual(
+            Blog.objects.filter(title__icontains="same").count(),
+            2
+        )
+        self.assertEqual(
+            Blog.objects.filter(title__contains="same").count(),
+            2
+        )
+        self.assertEqual(
+            Blog.objects.filter(title__iexact="same Title").count(),
+            2
+        )
 
     def test_change_model(self):
         blog1 = Blog(title="blog 1")
