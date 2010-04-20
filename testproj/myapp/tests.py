@@ -3,7 +3,7 @@ Test suite for mangodj.
 """
 
 from django.test import TestCase
-from testproj.myapp.models import Entry, Blog, StandardAutoFieldModel
+from testproj.myapp.models import Entry, Blog, StandardAutoFieldModel, Person, TestFieldModel
 import datetime
 
 class MongoDjTest(TestCase):
@@ -148,6 +148,48 @@ class MongoDjTest(TestCase):
             list(Entry.objects.filter(date_published__gt=now)),
             [entry2]
         )
+    def test_complex_queries(self):
+        p1 = Person(name="igor", surname="duck", age=39)
+        p1.save()
+        p2 = Person(name="andrea", surname="duck", age=29)
+        p2.save()
+        self.assertEqual(
+            Person.objects.filter(name="igor", surname="duck").count(),
+            1
+        )
+        self.assertEqual(
+            Person.objects.filter(age__gte=20, surname="duck").count(),
+            2
+        )
+
+    def test_fields(self):
+        t1 = TestFieldModel(title="p1", 
+                            mlist=["ab", "bc"])
+        t1.save()
+        
+        t = TestFieldModel.objects.get(id=t1.id)
+        self.assertEqual(t.mlist, ["ab", "bc"])
+        self.assertEqual(t.mlist_default, ["a", "b"])
+        
+#    def test_dates_year_month_day(self):
+#        now = datetime.datetime.now()
+#        before = now + datetime.timedelta(days=1)
+#        after = now - datetime.timedelta(days=1)
+#        
+#        entry1 = Entry(title="entry 1", date_published=now)
+#        entry1.save()
+#
+#        entry2 = Entry(title="entry 2", date_published=before)
+#        entry2.save()
+#
+#        entry3 = Entry(title="entry 3", date_published=after)
+#        entry3.save()
+#
+#        self.assertEqual(
+#            Entry.objects.filter(date_published__year=now.year).count(),
+#            3
+#        )
+
 
     def test_simple_foreign_keys(self):
         now = datetime.datetime.now()

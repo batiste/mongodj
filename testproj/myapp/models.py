@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from mongodj.db.fields import ListField
 
 class StringAutoField(models.AutoField):
 
@@ -61,6 +62,14 @@ class Entry(models.Model):
     def __unicode__(self):
         return "Entry: %s" % (self.title)
 
+class Person(models.Model):
+    name = models.CharField(max_length=20)
+    surname = models.CharField(max_length=20)
+    age = models.IntegerField(null=True, blank=True)
+    
+    def __unicode__(self):
+        return u"Person: %s %s" % (self.name, self.surname)
+
 
 class StandardAutoFieldModel(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -68,3 +77,11 @@ class StandardAutoFieldModel(models.Model):
     
     def __unicode__(self):
         return "Standard model: %s" % (self.title)
+
+class TestFieldModel(models.Model):
+    title = models.CharField(max_length=200)
+    mlist = ListField()
+    mlist_default = ListField(default=["a", "b"])
+    
+    def __unicode__(self):
+        return "Test special field model: %s" % (self.title)
