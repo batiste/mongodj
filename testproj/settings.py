@@ -1,6 +1,6 @@
 DATABASES = {
     'default': {
-        'ENGINE': 'db',
+        'ENGINE': 'mongodj.db',
         'NAME': 'test',
         'USER': '',
         'PASSWORD': '',
