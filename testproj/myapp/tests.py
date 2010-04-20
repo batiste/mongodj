@@ -129,3 +129,12 @@ class SimpleTest(TestCase):
                 entry.blog
             )
 
+        blog2 = Blog(title="Blog")
+        blog2.save()
+        entry3 = Entry(title="entry 3", blog=blog2)
+        entry3.save()
+        self.assertEqual(
+            # it's' necessary to explicitly state the pk here
+            list(Entry.objects.filter(blog=blog1.pk)),
+            [entry1, entry2]
+        )
