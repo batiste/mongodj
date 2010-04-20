@@ -3,7 +3,7 @@ Test suite for mangodj.
 """
 
 from django.test import TestCase
-from mongodj.test.myapp.models import Entry, Blog
+from testproj.myapp.models import Entry, Blog
 import datetime
 
 class SimpleTest(TestCase):
@@ -121,6 +121,7 @@ class SimpleTest(TestCase):
         entry1.save()
         entry2 = Entry(title="entry 2", blog=blog1)
         entry2.save()
+        self.assertEqual(Entry.objects.count(), 2)
 
         for entry in Entry.objects.all():
             self.assertEqual(

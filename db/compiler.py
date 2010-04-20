@@ -173,7 +173,6 @@ class SQLInsertCompiler(SQLCompiler):
         dat = {}
         for (field, value), column in zip(self.query.values, self.query.columns):
             if value == None and field.null == True:
-                #dat[column] = None
                 pass
             else:
                 dat[column] = python2db(field.db_type(connection=self.connection), value)

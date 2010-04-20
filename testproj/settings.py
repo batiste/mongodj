@@ -1,6 +1,6 @@
 DATABASES = {
     'default': {
-        'ENGINE': 'mongodj.db',
+        'ENGINE': 'db',
         'NAME': 'test',
         'USER': '',
         'PASSWORD': '',
@@ -12,5 +12,5 @@ DATABASES = {
 
 
 INSTALLED_APPS = (
-    "myapp",
+    "testproj.myapp",
 )
