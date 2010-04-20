@@ -36,6 +36,8 @@ OPERATORS_MAP = {
     'iendswith':    lambda val: re.compile(r'%s$' % val, re.IGNORECASE),
     'contains':    lambda val: re.compile(r'%s' % val),
     'icontains':    lambda val: re.compile(r'%s' % val, re.IGNORECASE),
+    'regex':    lambda val: re.compile(val),
+    'iregex':    lambda val: re.compile(val, re.IGNORECASE),
     'gt':       lambda val: {"$gt": val},
     'gte':      lambda val: {"$gte": val},
     'lt':       lambda val: {"$lt": val},

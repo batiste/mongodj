@@ -83,6 +83,15 @@ class MongoDjTest(TestCase):
             2
         )
 
+        self.assertEqual(
+            Blog.objects.filter(title__regex="s.me.*").count(),
+            2
+        )
+        self.assertEqual(
+            Blog.objects.filter(title__iregex="S.me.*").count(),
+            2
+        )
+
     def test_change_model(self):
         blog1 = Blog(title="blog 1")
         blog1.save()
