@@ -164,12 +164,17 @@ class MongoDjTest(TestCase):
 
     def test_fields(self):
         t1 = TestFieldModel(title="p1", 
-                            mlist=["ab", "bc"])
+                            mlist=["ab", "bc"],
+                            slist=["bc", "ab"],
+                            )
         t1.save()
         
         t = TestFieldModel.objects.get(id=t1.id)
         self.assertEqual(t.mlist, ["ab", "bc"])
         self.assertEqual(t.mlist_default, ["a", "b"])
+        self.assertEqual(t.slist, ["ab", "bc"])
+        self.assertEqual(t.slist_default, ["a", "b"])
+        
         
 #    def test_dates_year_month_day(self):
 #        now = datetime.datetime.now()

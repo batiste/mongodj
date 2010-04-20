@@ -42,4 +42,26 @@ class ListField(Field):
                 return self.default()
             return self.default
         return []
-    
+
+class SortedListField(ListField):
+    """A ListField that sorts the contents of its list before writing to
+    the database in order to ensure that a sorted list is always
+    retrieved.
+    """
+
+    _ordering = None
+
+    def __init__(self, *args, **kwargs):
+        if 'ordering' in kwargs.keys():
+            self._ordering = kwargs.pop('ordering')
+        super(SortedListField, self).__init__(*args, **kwargs)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        if not isinstance(value, list):
+            if hasattr(value, "__iter__"):
+                value = list(value)
+        if self._ordering is not None:
+            return sorted(value, key=itemgetter(self._ordering))
+        return sorted(value)

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from mongodj.db.fields import ListField
+from mongodj.db.fields import ListField, SortedListField
 
 class StringAutoField(models.AutoField):
 
@@ -82,6 +82,8 @@ class TestFieldModel(models.Model):
     title = models.CharField(max_length=200)
     mlist = ListField()
     mlist_default = ListField(default=["a", "b"])
-    
+    slist = SortedListField()
+    slist_default = SortedListField(default=["b", "a"])
+
     def __unicode__(self):
         return "Test special field model: %s" % (self.title)
