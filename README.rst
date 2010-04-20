@@ -8,7 +8,7 @@ for mongo (so that it can be accessed through the django ORM).
 
 The project is in the early stage
 
-mongoDB is accessed through pyMongoa and relies on the django-nonrel branch: http://bitbucket.org/wkornewald/django-nonrel/wiki/Home
+mongoDB is accessed through pyMongo and relies on django-trunk (>=1.2)
 
 Features that works::
 
