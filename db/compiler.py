@@ -21,8 +21,7 @@ TYPE_MAPPING = {
     'int':      lambda val: int(val),
     'float':    lambda val: float(val),
     'bool':     lambda val: bool(val),
-    # TODO - get rid of this?
-    'objectid': lambda val: ObjectId(val),
+    'objectid': lambda val: val,
 }
 
 OPERATORS_MAP = {
