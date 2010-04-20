@@ -128,6 +128,10 @@ class SQLCompiler(SQLCompiler):
         _high_limit = self.query.high_mark or 0
         _low_limit = self.query.low_mark or 0
         query = self._get_query()
+        pk_name = self.query.model._meta.pk.attname
+        # if we have a pk, we need to the value to match mongodb id
+        if query.has_key(pk_name):
+            query['_id'] = query[pk_name]
         
         results = self._get_collection().find(query).skip(_low_limit).limit(
             _high_limit - _low_limit)
@@ -190,15 +194,12 @@ class SQLInsertCompiler(SQLCompiler):
             if isinstance(pk_field, (models.CharField, StringAutoField)):
                 dat[pk_name] = str(ObjectId())
             else:
-                # create a random, hopefully unique 64 bits value
+                #create a random to satisfy the primary key
                 import random
                 dat[pk_name] = str(random.getrandbits(64))
-        elif isinstance(pk_field, (models.CharField)):
-            # if the Primary key is a charfield, and the value is provided.
-            # we have an issue because it not possible to ensure uniqueness.
-            # so I try to use a objectid instead even if it's incorrect.
-            dat[pk_name] = str(ObjectId())
-                
+
+        # copy the primary key into the mongodb unique id field
+        dat['_id'] = dat[pk_name]
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:

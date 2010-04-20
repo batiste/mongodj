@@ -176,16 +176,18 @@ class MongoDjTest(TestCase):
     def test_session_backend(self):
         from sessions_backend import SessionStore
         from django.contrib.sessions.models import Session
+        from pymongo.objectid import ObjectId
+        Session.objects.all().delete()
 
-        session = Session()
+        session = Session(session_key=str(ObjectId()))
         session.save()
         self.assertEqual(Session.objects.count(), 1)
         session.save()
         self.assertEqual(Session.objects.count(), 1)
         session.expire_date = datetime.datetime.now()
         self.assertEqual(Session.objects.count(), 1)
-        
-        self.assertEqual(Session.objects.count(), 0)
+        Session.objects.all().delete()
+
         store = SessionStore()
         self.assertFalse(store.exists('toto'))
         self.assertFalse(store.exists(store.session_key))
@@ -197,8 +199,6 @@ class MongoDjTest(TestCase):
         
         store['test1'] = 'a'
         store.save()
-
-        #print [s.session_key for s in Session.objects.all()]
 
         self.assertEqual(Session.objects.count(), 1)
 
