@@ -6,7 +6,7 @@ from django.test import TestCase
 from testproj.myapp.models import Entry, Blog
 import datetime
 
-class SimpleTest(TestCase):
+class MongoDjTest(TestCase):
     
     def test_add_and_delete_blog(self):
         blog1 = Blog(title="blog1")
@@ -137,4 +137,16 @@ class SimpleTest(TestCase):
             # it's' necessary to explicitly state the pk here
             list(Entry.objects.filter(blog=blog1.pk)),
             [entry1, entry2]
+        )
+        
+
+    def test_foreign_keys_bug(self):
+        blog1 = Blog(title="Blog")
+        blog1.save()
+        entry1 = Entry(title="entry 1", blog=blog1)
+        entry1.save()
+        self.assertEqual(
+            # this should work too
+            list(Entry.objects.filter(blog=blog1)),
+            [entry1]
         )

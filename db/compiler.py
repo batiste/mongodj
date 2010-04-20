@@ -172,18 +172,15 @@ class SQLInsertCompiler(SQLCompiler):
         """
         dat = {}
         for (field, value), column in zip(self.query.values, self.query.columns):
-            if value == None and field.null == True:
-                pass
-            else:
-                dat[column] = python2db(field.db_type(connection=self.connection), value)
+            dat[column] = python2db(field.db_type(connection=self.connection), value)
         # every object should have a unique pk
-        if not dat.has_key('_id'):
-            # TODO: maybe the pk name should be retrieved from the model
-            dat['_id'] = str(ObjectId())
+        pk_name = self.query.model._meta.pk.attname
+        if not dat.has_key(pk_name):
+            dat[pk_name] = str(ObjectId())
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
-        
+
         if return_id:
-            return dat['_id']
+            return dat[pk_name]
 
 class SQLUpdateCompiler(SQLCompiler):
     # TODO
