@@ -26,7 +26,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         'BigIntegerField':              'int',
         'GenericAutoField':             'objectid',
         'StringForeignKey':             'objectid',
-        'AutoField':                    'objectid',
+        'AutoField':                    'unicode',
         'OneToOneField':                'int',
         'DecimalField':                 'float',
     }

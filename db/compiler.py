@@ -1,6 +1,8 @@
 import datetime
 import sys
 
+from testproj.myapp.models import StringAutoField
+
 import pymongo
 from pymongo.objectid import ObjectId
 
@@ -13,6 +15,7 @@ from django.db.models.sql.where import AND, OR
 from django.db.utils import DatabaseError, IntegrityError
 from django.utils.tree import Node
 from django.db.models.sql.where import WhereNode
+
 
 from django.conf import settings
 
@@ -173,9 +176,16 @@ class SQLInsertCompiler(SQLCompiler):
         for (field, value), column in zip(self.query.values, self.query.columns):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
         # every object should have a unique pk
-        pk_name = self.query.model._meta.pk.attname
+        pk_field = self.query.model._meta.pk
+        pk_name = pk_field.attname
         if not dat.has_key(pk_name):
-            dat[pk_name] = str(ObjectId())
+            if isinstance(pk_field, StringAutoField):
+                dat[pk_name] = str(ObjectId())
+            else:
+                # create a random, hopefully unique 64 bits value
+                import random
+                dat[pk_name] = str(random.getrandbits(64))
+                
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:
