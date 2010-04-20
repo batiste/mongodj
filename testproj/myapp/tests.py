@@ -166,6 +166,7 @@ class MongoDjTest(TestCase):
         t1 = TestFieldModel(title="p1", 
                             mlist=["ab", "bc"],
                             slist=["bc", "ab"],
+                            mdict = {'a':23, "b":True  }
                             )
         t1.save()
         
@@ -174,6 +175,8 @@ class MongoDjTest(TestCase):
         self.assertEqual(t.mlist_default, ["a", "b"])
         self.assertEqual(t.slist, ["ab", "bc"])
         self.assertEqual(t.slist_default, ["a", "b"])
+        self.assertEqual(t.mdict, {'a':23, "b":True  })
+        self.assertEqual(t.mdict_default, {"a": "a", 'b':1})
         
         
 #    def test_dates_year_month_day(self):
