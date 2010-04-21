@@ -96,9 +96,18 @@ class SQLCompiler(SQLCompiler):
         elif result_type is MULTI:
             return [[count]]
     
-    def _get_query(self, query=None, where=None):
-        query = query or {}
-        where = where or self.query.where
+    def _get_query(self):
+        query = {}
+        where = self.query.where
+        query = self._get_query_recursif(query=query, where=where)
+        pk_column = self.query.get_meta().pk.column
+        # if we have a _id, we need to put back the value into the pk_column
+        if query.has_key(pk_column):
+            query['_id'] = query[pk_column]
+            del query[pk_column]
+        return query
+
+    def _get_query_recursif(self, query, where):
         if where.connector == OR:
             raise NotImplementedError("OR queries not supported yet.")
         for child in where.children:
@@ -107,7 +116,7 @@ class SQLCompiler(SQLCompiler):
                     _parse_constraint(child, self.connection)
                 query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
             elif isinstance(child, WhereNode):
-                query = self._get_query(query=query, where=child)
+                query = self._get_query_recursif(query=query, where=child)
         return query
     
     def _get_collection(self):
@@ -128,10 +137,6 @@ class SQLCompiler(SQLCompiler):
         _high_limit = self.query.high_mark or 0
         _low_limit = self.query.low_mark or 0
         query = self._get_query()
-        pk_name = self.query.model._meta.pk.attname
-        # if we have a pk, we need to the value to match mongodb id
-        if query.has_key(pk_name):
-            query['_id'] = query[pk_name]
         
         results = self._get_collection().find(query).skip(_low_limit).limit(
             _high_limit - _low_limit)
@@ -156,7 +161,12 @@ class SQLCompiler(SQLCompiler):
         self.query - the query created by the ORM
         self.query.where - conditions imposed by the query
         """
+        pk_column = str(self.query.get_meta().pk.column)
         for document in self.get_results():
+            # remove the_id at the last moment if present
+            if document.has_key('_id'):
+                document[pk_column] = document['_id']
+                del document['_id']
             result = []
             for field in self.query.get_meta().local_fields:
                 result.append(db2python(field.db_type(
@@ -180,30 +190,29 @@ class SQLInsertCompiler(SQLCompiler):
         self.query - the data that should be inserted
         """
         dat = {}
-        pk_field = self.query.model._meta.pk
-        pk_name = pk_field.attname
-        #pk_value = None
+        pk_field = self.query.get_meta().pk
+        pk_column = str(self.query.get_meta().pk.column)
         
         for (field, value), column in zip(self.query.values, self.query.columns):
-            #if pk_name == field.attname:
-            #    pk_value = value
             dat[column] = python2db(field.db_type(connection=self.connection), value)
 
         # every object should have a unique pk
-        if not dat.has_key(pk_name):
+        if not dat.has_key(pk_column):
             if isinstance(pk_field, (models.CharField, StringAutoField)):
-                dat[pk_name] = str(ObjectId())
+                dat['_id'] = str(ObjectId())
             else:
-                #create a random to satisfy the primary key
+                #create a random int to satisfy the primary key
                 import random
-                dat[pk_name] = str(random.getrandbits(64))
-
-        # copy the primary key into the mongodb unique id field
-        dat['_id'] = dat[pk_name]
+                dat['_id'] = str(random.getrandbits(64))
+        else:
+            # copy the primary key into the mongodb unique id field
+            dat['_id'] = dat[pk_column]
+            del dat[pk_column]
+        
         self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:
-            return dat[pk_name]
+            return dat['_id']
 
 class SQLUpdateCompiler(SQLCompiler):
     # TODO
@@ -211,4 +220,5 @@ class SQLUpdateCompiler(SQLCompiler):
 
 class SQLDeleteCompiler(SQLCompiler):
     def execute_sql(self, result_type=MULTI):
-        return self._get_collection().remove(self._get_query())
+        query = self._get_query()
+        return self._get_collection().remove(query)
