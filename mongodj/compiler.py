@@ -123,7 +123,13 @@ class SQLCompiler(SQLCompiler):
             if isinstance(child, (list, tuple)):
                 lookup_type, collection, column, db_type, value = \
                     _parse_constraint(child, self.connection)
-                query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
+                if column in ['id', "pk"]:
+                    if lookup_type=="exact":
+                        query["_id"] = value
+                    elif lookup_type=="in":
+                        query["_id"] = {"$in":value}
+                else:
+                    query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
             elif isinstance(child, WhereNode):
                 query = self._get_query(query=query, where=child)
         return query
@@ -202,19 +208,34 @@ class SQLInsertCompiler(SQLCompiler):
         if not dat.has_key(pk_name):
             if isinstance(pk_field, StringAutoField):
                 dat[pk_name] = str(ObjectId())
-            else:
-                # create a random, hopefully unique 64 bits value
-                import random
-                dat[pk_name] = str(random.getrandbits(64))
+#            else:
+#                # create a random, hopefully unique 64 bits value
+#                import random
+#                dat[pk_name] = str(random.getrandbits(64))
                 
-        self.connection._cursor()[self.query.get_meta().db_table].save(dat)
+        res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:
-            return dat[pk_name]
+            return unicode(res)
 
 class SQLUpdateCompiler(SQLCompiler):
-    upsert = True
 
+    def execute_sql(self, return_id=False):
+        """
+        self.query - the data that should be inserted
+        """
+        dat = {}
+        for (field, value), column in zip(self.query.values, self.query.columns):
+            dat[column] = python2db(field.db_type(connection=self.connection), value)
+        # every object should have a unique pk
+        pk_field = self.query.model._meta.pk
+        pk_name = pk_field.attname
+                
+        res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
+
+        if return_id:
+            return unicode(res)
+        
 class SQLDeleteCompiler(SQLCompiler):
     def execute_sql(self, result_type=MULTI):
         return self._get_collection().remove(self._get_query())
