@@ -191,15 +191,16 @@ class SQLInsertCompiler(SQLCompiler):
         """
         dat = {}
         pk_field = self.query.get_meta().pk
-        pk_column = str(self.query.get_meta().pk.column)
+        pk_column = self.query.get_meta().pk.column
         
         for (field, value), column in zip(self.query.values, self.query.columns):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
 
-        # every object should have a unique pk
+        # every object should have a unique pk, (is it always the case in Django?)
         if not dat.has_key(pk_column):
             if isinstance(pk_field, (models.CharField, StringAutoField)):
                 dat['_id'] = str(ObjectId())
+            # TODO: I assume that it's a int there... It's not correct
             else:
                 #create a random int to satisfy the primary key
                 import random
