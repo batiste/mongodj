@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Field
+from django.db.models import Field, ForeignKey, AutoField
 from django.utils.translation import ugettext_lazy as _
 from django.core import serializers
 
@@ -181,3 +181,47 @@ class SetListField(Field):
         if value is None:
             return set()
         return set(value)
+
+
+class StringAutoField(AutoField):
+    """Native MongoDB primary key Field."""
+
+    default_error_messages = {
+        'invalid': _(u'This value must be an string.'),
+    }
+
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        return str(value)
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        try:
+            return str(value)
+        except (TypeError, ValueError):
+            raise exceptions.ValidationError(self.error_messages['invalid'])
+
+class StringForeignKey(ForeignKey):
+    """Foreign key on a Native MongoDB primary key Field."""
+
+    default_error_messages = {
+        'invalid': _(u'This value must be an string.'),
+    }
+
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        return str(value)
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        try:
+            return str(value)
+        except (TypeError, ValueError):
+            raise exceptions.ValidationError(self.error_messages['invalid'])
+
+    def db_type(self, connection):
+        return unicode
