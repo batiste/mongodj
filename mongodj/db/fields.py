@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Field
 from django.utils.translation import ugettext_lazy as _
 
-__all__ = ["ListField", ]
+__all__ = ["ListField", "DictField", "SetListField", "SortedListField"]
 
 class ListField(Field):
     """A list field that wraps a standard field, allowing multiple instances
@@ -101,3 +101,70 @@ class DictField(Field):
                 return self.default()
             return self.default
         return {}
+
+
+class SetListField(Field):
+    """A list field that allows only one instance for item.
+    """
+
+    description = _("List Set Field")
+    
+    default_error_messages = {
+        'invalid': _(u'This value must be a set.'),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['blank'] = True
+        if 'default' not in kwargs:
+            kwargs['default'] = set()
+        Field.__init__(self, *args, **kwargs)
+    def validate(self, value, model_instance):
+        """
+        Validates value and throws ValidationError. 
+        """
+        if not isinstance(value, set):
+            raise exceptions.ValidationError(self.error_messages['invalid'])
+
+        if value is None and not self.null:
+            raise exceptions.ValidationError(self.error_messages['null'])
+
+        if not self.blank and value in validators.EMPTY_VALUES:
+            raise exceptions.ValidationError(self.error_messages['blank'])
+
+    def get_default(self):
+        "Returns the default value for this field."
+        if self.has_default():
+            if callable(self.default):
+                return self.default()
+            return self.default
+        return set()
+
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        """Returns field's value prepared for interacting with the database
+        backend.
+
+        Used by the default implementations of ``get_db_prep_save``and
+        `get_db_prep_lookup```
+        """
+        if not prepared:
+            value = list(self.get_prep_value(value))
+        return value
+    
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        if not isinstance(value, set):
+            if hasattr(value, "__iter__"):
+                value = set(value)
+        return set(value)
+    
+    def to_python(self, value):
+        """
+        Converts the input value into the expected Python data type, raising
+        django.core.exceptions.ValidationError if the data can't be converted.
+        Returns the converted value.
+        """
+        if value is None:
+            return set()
+        return set(value)
