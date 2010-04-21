@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.core.files.storage import Storage
 from django.utils.encoding import force_unicode
-from pymongo.gridfs import GridFS
+from gridfs import GridFS
 from mongodj.db.base import get_connection_from_dict
 
 class GridFSStorage(Storage):
@@ -11,16 +11,18 @@ class GridFSStorage(Storage):
     """
 
     def _get_fs(self):
-        setting_dict = settings.get('MONGODB_FILE_STORAGE_DATABASE', None)
+        setting_dict = settings.MONGODB_FILE_STORAGE_DATABASE
         if setting_dict is None:
-            raise ValueError("GridFSStorage need
- MONGODB_FILE_STORAGE_DATABASE setting to be set.")
+            raise ValueError("""GridFSStorage need
+ MONGODB_FILE_STORAGE_DATABASE setting to be set.""")
         conn, name = get_connection_from_dict(setting_dict)
-        return GridFS(conn)
+        return GridFS(conn[name])
 
     def open(self, name, mode='rb'):
+        if name is None:
+            name = content.name
         fs = self._get_fs()
-        file = fs.open(name, mode)
+        file = fs.get_last_version(name)
         return file
 
     def save(self, name, content):
@@ -32,9 +34,8 @@ class GridFSStorage(Storage):
         if name is None:
             name = content.name
         fs = self._get_fs()
-        file = fs.open(name, 'rw')
+        file = fs.new_file(filename=name)
         file.write(content)
-        file.close()
         # Store filenames with forward slashes, even on Windows
         return force_unicode(name.replace('\\', '/'))
 
@@ -61,7 +62,7 @@ class GridFSStorage(Storage):
         Deletes the specified file from the storage system.
         """
         fs = self._get_fs()
-        file = fs.remove(name)
+        file = fs.delete(name)
 
     def exists(self, name):
         """
@@ -75,7 +76,9 @@ class GridFSStorage(Storage):
         Lists the contents of the specified path, returning a 2-tuple of lists;
         the first item being directories, the second item being files.
         """
-        raise NotImplementedError()
+        fs = self._get_fs()
+        return ((),fs.list())
+        
 
     def size(self, name):
         """
