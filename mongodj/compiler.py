@@ -212,6 +212,11 @@ class SQLInsertCompiler(SQLCompiler):
 #                # create a random, hopefully unique 64 bits value
 #                import random
 #                dat[pk_name] = str(random.getrandbits(64))
+        if pk_name=='id' and pk_name in dat and type(pk_field).__name__ =="AutoField":
+            pk = dat.pop(pk_name)
+            if isinstance(pk, (str, unicode)):
+                pk = ObjectId(pk)
+            dat['_id'] = pk
                 
         res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
