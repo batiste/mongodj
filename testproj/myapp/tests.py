@@ -284,7 +284,7 @@ class MongoDjTest(TestCase):
 
 
     def test_session_backend(self):
-        from sessions_backend import SessionStore
+        from django.contrib.sessions.backends.db import SessionStore
         from django.contrib.sessions.models import Session
         from pymongo.objectid import ObjectId
         Session.objects.all().delete()
