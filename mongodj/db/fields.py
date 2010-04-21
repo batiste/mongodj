@@ -1,8 +1,26 @@
 from django.db import models
 from django.db.models import Field
 from django.utils.translation import ugettext_lazy as _
+from django.core import serializers
 
 __all__ = ["ListField", "DictField", "SetListField", "SortedListField"]
+
+class EmbeddedModel(models.Model):
+    _embedded_in =None
+    
+    def save(self, *args, **kwargs):
+        if self._embedded_in  is None:
+            raise RuntimeError("Invalid save")
+        self._embedded_in.save()
+
+    def serialize(self):
+        result = {'_app':self._meta.app_label, 
+            '_model':self._meta.module_name,
+            'pk':self.pk}
+        for field in self._meta.fields:
+            result[field.attname] = getattr(self, field.attname)
+        return result
+    
 
 class ListField(Field):
     """A list field that wraps a standard field, allowing multiple instances
@@ -23,12 +41,9 @@ class ListField(Field):
     def get_prep_value(self, value):
         if value is None:
             return None
-        if isinstance(value, list):
-            return value
-        if hasattr(value, "__iter__"):
-            return list(value)
-        #???
-        return value
+        if not isinstance(value, list) and (not hasattr(value, "__iter__")):
+            raise exceptions.ValidationError(self.error_messages['invalid'])
+        return list(value)
 
     def to_python(self, value):
         if value is None:
@@ -60,13 +75,12 @@ class SortedListField(ListField):
     def get_prep_value(self, value):
         if value is None:
             return None
-        if not isinstance(value, list):
-            if hasattr(value, "__iter__"):
-                value = list(value)
+        if not isinstance(value, list) and (not hasattr(value, "__iter__")):
+            raise exceptions.ValidationError(self.error_messages['invalid'])
         if self._ordering is not None:
             return sorted(value, key=itemgetter(self._ordering))
         return sorted(value)
-
+    
 class DictField(Field):
     """A dictionary field that wraps a standard Python dictionary.
     Key cannot contains . or $ for query problems.
@@ -101,7 +115,6 @@ class DictField(Field):
                 return self.default()
             return self.default
         return {}
-
 
 class SetListField(Field):
     """A list field that allows only one instance for item.

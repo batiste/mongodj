@@ -16,15 +16,12 @@ mongoDB is accessed through pyMongo and relies on django-trunk (>=1.2).
 
 Some fields types are imported from mongoengine.
 
-Features that works::
+Features:
 
-    Blog.objects.count()
-    Blog.objects.get(title="my title")
-    Blog.objects.filter(title="my title")
-    Entry.objects.order_by('-date_published')
-    Entry.objects.filter(date_published__lt=now)
-    entry1 = Entry(title="entry 1", blog=blog1)
-    Entry.objects.filter(blog=blog1.pk)
+	- multidb (use a mixin of SQL and NotSQL DB)
+	- Embdedded model management
+	- SQL model management
+	- Routing on mongodb of some apps
 
 Extra fields:
 
@@ -32,7 +29,7 @@ Extra fields:
 	- List Field
 	- Sorted List Field	
 
-TODO (ramdom order)::
+TODO (ramdom order):
 
 	- south support
 	- gridfs
@@ -40,6 +37,57 @@ TODO (ramdom order)::
 	- set field
 	- special manager for complex query (map/reduce)
 
+
+Settings configuration
+----------------------
+
+Set up database with Rel and not rel database.
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'test.db',                     
+        'USER': '',                     
+        'PASSWORD': '',                  
+        'HOST': '',                     
+        'PORT': '',                     
+    },
+    'mongodb': {
+        'ENGINE': 'mongodj.db',
+        'NAME': 'test',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '27017',
+        'SUPPORTS_TRANSACTIONS': False,
+    },
+}
+
+in INSTALLED_APPS 'django.contrib.contenttypes' is required.
+
+Activate routing adding::
+
+	DATABASE_ROUTERS = ['mongodj.db.router.MongoDBRouter']
+
+
+Select apps that you want manage in mongodb::
+
+	MONGODB_MANAGED_APPS = ['testproj.myapp', ]
+
+
+Extra
+-----
+
 Hey dudes add an issue if you want some other features!
+
+Examples::
+
+    Blog.objects.count()
+    Blog.objects.get(title="my title")
+    Blog.objects.filter(title="my title")
+    Entry.objects.order_by('-date_published')
+    Entry.objects.filter(date_published__lt=now)
+    entry1 = Entry(title="entry 1", blog=blog1)
+    Entry.objects.filter(blog=blog1.pk)	
 
 PS: for extra examples and usage look the testproj (models.py and test.py).

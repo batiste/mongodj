@@ -213,8 +213,7 @@ class SQLInsertCompiler(SQLCompiler):
             return dat[pk_name]
 
 class SQLUpdateCompiler(SQLCompiler):
-    # TODO
-    pass
+    upsert = True
 
 class SQLDeleteCompiler(SQLCompiler):
     def execute_sql(self, result_type=MULTI):

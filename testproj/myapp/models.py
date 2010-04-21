@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from mongodj.db.fields import ListField, SortedListField, DictField, SetListField
+from mongodj.db.fields import ListField, SortedListField, DictField, SetListField, EmbeddedModel
 
 class StringAutoField(models.AutoField):
 
@@ -77,6 +77,13 @@ class StandardAutoFieldModel(models.Model):
     
     def __unicode__(self):
         return "Standard model: %s" % (self.title)
+
+class EModel(EmbeddedModel):
+    title = models.CharField(max_length=200)
+    pos = models.IntegerField(default = 10)
+
+    def test_func(self):
+        return self.pos
 
 class TestFieldModel(models.Model):
     title = models.CharField(max_length=200)

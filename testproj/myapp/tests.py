@@ -3,11 +3,12 @@ Test suite for mangodj.
 """
 
 from django.test import TestCase
-from testproj.myapp.models import Entry, Blog, StandardAutoFieldModel, Person, TestFieldModel
+from testproj.myapp.models import Entry, Blog, StandardAutoFieldModel, Person, TestFieldModel, EModel
 import datetime
 
 class MongoDjTest(TestCase):
-    
+    multi_db = True
+
     def test_add_and_delete_blog(self):
         blog1 = Blog(title="blog1")
         blog1.save()
@@ -181,6 +182,25 @@ class MongoDjTest(TestCase):
         self.assertEqual(sorted(t.mset), ["a", 'b'])
         self.assertEqual(sorted(t.mset_default), ["a", 'b'])
 
+
+    def test_embedded_model(self):
+        em = EModel(title="1", pos = 1)
+        em2 = EModel(title="2", pos = 2)
+        t1 = TestFieldModel(title="p1", 
+                            mlist=[em, em2],
+                            slist=[em, em2],
+                            mdict = {'a':em, "b":em2  },
+                            mset=[em, em, em]
+                            )
+        t1.save()
+        
+        t = TestFieldModel.objects.get(id=t1.id)
+        self.assertEqual(len(t.mlist), 2)
+        self.assertEqual(t.mlist[0].test_func(), 1)
+        self.assertEqual(t.mlist[1].test_func(), 2)
+        
+        
+        
         
 #    def test_dates_year_month_day(self):
 #        now = datetime.datetime.now()

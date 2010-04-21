@@ -39,9 +39,11 @@ class CursorWrapper():
     Let's imitate the methods cursor has
     """
     def __init__(self, conn, NAME):
+        from .mongodb_serializer import TransformDjango
         self.conn = conn
         self.db_name = NAME
         self.db = conn[NAME]
+        self.db.add_son_manipulator(TransformDjango())
 
     def execute(self, query, args=None):
         pass
@@ -102,3 +104,4 @@ the mongoDB are not correct")
 
     def _cursor(self):
         return self.db_connection
+
