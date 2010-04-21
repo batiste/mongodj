@@ -15,7 +15,7 @@ from django.db.models.sql.where import AND, OR
 from django.db.utils import DatabaseError, IntegrityError
 from django.utils.tree import Node
 from django.db.models.sql.where import WhereNode
-
+import re
 
 from django.conf import settings
 
@@ -29,6 +29,15 @@ TYPE_MAPPING = {
 
 OPERATORS_MAP = {
     'exact':    lambda val: val,
+    'iexact':    lambda val: re.compile(r'^%s$' % val, re.IGNORECASE),
+    'startswith':    lambda val: re.compile(r'%s' % val),
+    'istartswith':    lambda val: re.compile(r'^%s' % val, re.IGNORECASE),
+    'endswith':    lambda val: re.compile(r'%s$' % val),
+    'iendswith':    lambda val: re.compile(r'%s$' % val, re.IGNORECASE),
+    'contains':    lambda val: re.compile(r'%s' % val),
+    'icontains':    lambda val: re.compile(r'%s' % val, re.IGNORECASE),
+    'regex':    lambda val: re.compile(val),
+    'iregex':    lambda val: re.compile(val, re.IGNORECASE),
     'gt':       lambda val: {"$gt": val},
     'gte':      lambda val: {"$gte": val},
     'lt':       lambda val: {"$lt": val},
@@ -69,6 +78,18 @@ def _parse_constraint(where_child, connection):
             value = annotation
         else:
             value = value[0]
+    #fix managing of some specific "string manipulation in standard sql field" 
+    # line 287 in where.py  params = self.field.get_db_prep_lookup(lookup_type, value, connection=connection, prepared=True)
+    if lookup_type in ['startswith', 'istartswith']:
+        if value.endswith(u"%"):
+            value = value[:-1]
+    elif lookup_type in ['endswith', 'iendswith']:
+        if value.startswith(u"%"):
+            value = value[1:]
+    elif lookup_type in ['icontains', 'contains']:
+        value = value[1:-1]
+    
+#    print (lookup_type, table_alias, column, db_type, value) #very useful for fast debugging
     return (lookup_type, table_alias, column, db_type, value)
 
 class SQLCompiler(SQLCompiler):
@@ -216,8 +237,7 @@ class SQLInsertCompiler(SQLCompiler):
             return dat['_id']
 
 class SQLUpdateCompiler(SQLCompiler):
-    # TODO
-    pass
+    upsert = True
 
 class SQLDeleteCompiler(SQLCompiler):
     def execute_sql(self, result_type=MULTI):
