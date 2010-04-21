@@ -29,20 +29,40 @@ class ListField(Field):
 
     default_error_messages = {
         'invalid': _(u'This value must be a list or an iterable.'),
+        'invalid_value': _(u'Invalid value in list.'),
     }
 
     description = _("List Field")
+    _internaltype = None
     def __init__(self, *args, **kwargs):
         kwargs['blank'] = True
         if 'default' not in kwargs:
             kwargs['default'] = []
+        if 'type' in kwargs:
+            self._internaltype = kwargs.pop("type")
+            
         Field.__init__(self, *args, **kwargs)
 
+    def validate(self, value, model_instance):
+        """
+        Validates value and throws ValidationError. 
+        """
+        if not isinstance(value, list) and (not hasattr(value, "__iter__")):
+            raise exceptions.ValidationError(self.error_messages['invalid'])
+
+        if value is None and not self.null:
+            raise exceptions.ValidationError(self.error_messages['null'])
+
+        if not self.blank and value in validators.EMPTY_VALUES:
+            raise exceptions.ValidationError(self.error_messages['blank'])
+        if self._internaltype is not None:
+            for v in value:
+                if not isinstance(v, self._internaltype):
+                    raise exceptions.ValidationError(self.error_messages['invalid_value'])
+        
     def get_prep_value(self, value):
         if value is None:
             return None
-        if not isinstance(value, list) and (not hasattr(value, "__iter__")):
-            raise exceptions.ValidationError(self.error_messages['invalid'])
         return list(value)
 
     def to_python(self, value):
@@ -70,6 +90,8 @@ class SortedListField(ListField):
     def __init__(self, *args, **kwargs):
         if 'ordering' in kwargs.keys():
             self._ordering = kwargs.pop('ordering')
+        if 'type' in kwargs:
+            self._internaltype = kwargs.pop("type")
         super(SortedListField, self).__init__(*args, **kwargs)
 
     def get_prep_value(self, value):
@@ -121,15 +143,19 @@ class SetListField(Field):
     """
 
     description = _("List Set Field")
-    
+    _internaltype = None
     default_error_messages = {
         'invalid': _(u'This value must be a set.'),
+        'invalid_value': _(u'Invalid value in list.'),
     }
 
     def __init__(self, *args, **kwargs):
         kwargs['blank'] = True
         if 'default' not in kwargs:
             kwargs['default'] = set()
+        if 'type' in kwargs:
+            self._internaltype = kwargs.pop("type")
+
         Field.__init__(self, *args, **kwargs)
     def validate(self, value, model_instance):
         """
@@ -143,6 +169,10 @@ class SetListField(Field):
 
         if not self.blank and value in validators.EMPTY_VALUES:
             raise exceptions.ValidationError(self.error_messages['blank'])
+        if self._internaltype is not None:
+            for v in value:
+                if not isinstance(v, self._internaltype):
+                    raise exceptions.ValidationError(self.error_messages['invalid_value'])
 
     def get_default(self):
         "Returns the default value for this field."
