@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from mongodj.db.fields import ListField, SortedListField, DictField, SetListField, EmbeddedModel
+from mongodj.fields import ListField, SortedListField, DictField, SetListField, EmbeddedModel
 
 class StringAutoField(models.AutoField):
 

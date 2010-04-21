@@ -7,7 +7,7 @@ class MongoDBRouter(object):
         self.managed_apps = [app.split('.')[-1] for app in getattr(settings, "MONGODB_MANAGED_APPS", [])]
         self.mongodb_database = None
         for name, databaseopt in settings.DATABASES.items():
-            if databaseopt["ENGINE"]=='mongodj.db':
+            if databaseopt["ENGINE"]=='mongodj':
                 self.mongodb_database = name
         if self.mongodb_database is None:
             raise RuntimeError("A mongodb database must be set")

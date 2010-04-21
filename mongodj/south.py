@@ -37,3 +37,6 @@ class DatabaseOperations(object):
     
     def delete_table(self, table_name, cascade=True):
         pass
+    
+    def connection_init(self):
+        pass

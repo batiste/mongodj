@@ -22,6 +22,7 @@ Features:
 	- Embdedded model management
 	- SQL model management
 	- Routing on mongodb of some apps
+	- South support
 
 Extra fields:
 
@@ -31,7 +32,6 @@ Extra fields:
 
 TODO (ramdom order):
 
-	- south support
 	- gridfs
 	- geofield
 	- set field
@@ -53,7 +53,7 @@ DATABASES = {
         'PORT': '',                     
     },
     'mongodb': {
-        'ENGINE': 'mongodj.db',
+        'ENGINE': 'mongodj',
         'NAME': 'test',
         'USER': '',
         'PASSWORD': '',
@@ -67,12 +67,20 @@ in INSTALLED_APPS 'django.contrib.contenttypes' is required.
 
 Activate routing adding::
 
-	DATABASE_ROUTERS = ['mongodj.db.router.MongoDBRouter']
+	DATABASE_ROUTERS = ['mongodj.router.MongoDBRouter']
 
 
 Select apps that you want manage in mongodb::
 
 	MONGODB_MANAGED_APPS = ['testproj.myapp', ]
+
+
+South Support
+-------------
+
+Add this line to settings.py to make south happy to use mongodj.
+
+SOUTH_DATABASE_ADAPTERS = { "mongodb" : "mongodj.south"}
 
 
 Extra
