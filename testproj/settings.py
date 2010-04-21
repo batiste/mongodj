@@ -109,3 +109,4 @@ INSTALLED_APPS = (
 
 DATABASE_ROUTERS = ['mongodj.db.router.MongoDBRouter']
 MONGODB_MANAGED_APPS = ['testproj.myapp', 'django.contrib.sessions']
+MONGODB_FILE_STORAGE_DATABASE = DATABASES['mongodb']

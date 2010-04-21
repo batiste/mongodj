@@ -202,24 +202,24 @@ class MongoDjTest(TestCase):
         
         
         
-#    def test_dates_year_month_day(self):
-#        now = datetime.datetime.now()
-#        before = now + datetime.timedelta(days=1)
-#        after = now - datetime.timedelta(days=1)
-#        
-#        entry1 = Entry(title="entry 1", date_published=now)
-#        entry1.save()
-#
-#        entry2 = Entry(title="entry 2", date_published=before)
-#        entry2.save()
-#
-#        entry3 = Entry(title="entry 3", date_published=after)
-#        entry3.save()
-#
-#        self.assertEqual(
-#            Entry.objects.filter(date_published__year=now.year).count(),
-#            3
-#        )
+    def test_dates_year_month_day(self):
+        now = datetime.datetime.now()
+        before = now + datetime.timedelta(days=1)
+        after = now - datetime.timedelta(days=1)
+        
+        entry1 = Entry(title="entry 1", date_published=now)
+        entry1.save()
+
+        entry2 = Entry(title="entry 2", date_published=before)
+        entry2.save()
+
+        entry3 = Entry(title="entry 3", date_published=after)
+        entry3.save()
+
+        self.assertEqual(
+            Entry.objects.filter(date_published__year=now.year).count(),
+            3
+        )
 
 
     def test_simple_foreign_keys(self):

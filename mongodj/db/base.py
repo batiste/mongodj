@@ -72,18 +72,15 @@ class CursorWrapper():
         if not attr in self.__dict__:
             return getattr(self.db, attr)
         self.__dict__[attr]
-        
-class DatabaseWrapper(BaseDatabaseWrapper):
-    def __init__(self, *args, **kwds):
-        super(DatabaseWrapper, self).__init__(*args, **kwds)
-        settings_dict = self.settings_dict
+
+def get_connection_from_dict(settings_dict):
         NAME = settings_dict["NAME"]
         HOST = settings_dict["HOST"]
         try:
             PORT = int(settings_dict["PORT"])
         except ValueError:
             raise ImproperlyConfigured("PORT must be an integer, or a string \
-    which is easily convertable to an integer")
+which is easily convertable to an integer")
 
         USER = settings_dict["USER"]
         PASSWORD = settings_dict["PASSWORD"]
@@ -93,7 +90,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             if not auth:
                 raise ImproperlyConfigured("Username and/or password for \
 the mongoDB are not correct")
-        self.db_connection = CursorWrapper(conn, NAME)
+        return conn, NAME
+        
+class DatabaseWrapper(BaseDatabaseWrapper):
+    def __init__(self, *args, **kwds):
+        super(DatabaseWrapper, self).__init__(*args, **kwds)
+        settings_dict = self.settings_dict
+        conn, name = get_connection_from_dict(settings_dict)
+
+        self.db_connection = CursorWrapper(conn, name)
         
         self.features = DatabaseFeatures()
         self.ops = DatabaseOperations(self)
