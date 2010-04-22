@@ -48,6 +48,9 @@ class TransformDjango(SONManipulator):
         if isinstance(son, dict):
             if "_type" in son and son["_type"] in [u"django", u'emb']:
                 son = decode_django(son)
+            if "_id" in son:
+                pk = son.pop('_id')
+                son['id'] = unicode(pk)
             else:
                 for (key, value) in son.items():
                     if isinstance(value, dict):

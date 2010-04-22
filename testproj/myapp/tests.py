@@ -137,6 +137,7 @@ class MongoDjTest(TestCase):
         entry3 = Entry(title="entry 3", date_published=after)
         entry3.save()
 
+        a = list(Entry.objects.filter(date_published=now))
         self.assertEqual(
             list(Entry.objects.filter(date_published=now)),
             [entry1]
