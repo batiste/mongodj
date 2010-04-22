@@ -38,14 +38,13 @@ class DatabaseCreation(BaseDatabaseCreation):
     def sql_create_model(self, model, style, known_models=set()):
         opts = model._meta
         kwargs = {}
-        if hasattr(opts, "capped_collection") and opts.capped_collection:
-            kwargs["capped"] = True
+        kwargs["capped"] = getattr(opts, "capped", False)
         if hasattr(opts, "collection_max") and opts.collection_max:
             kwargs["max"] = opts.collection_max
         if hasattr(opts, "collection_size") and opts.collection_size:
             kwargs["size"] = opts.collection_size
         col = Collection(self.connection.db_connection.db, opts.db_table, **kwargs)
-        return "", {}
+        return [], {}
 
     def set_autocommit(self):
         "Make sure a connection is in autocommit mode."
