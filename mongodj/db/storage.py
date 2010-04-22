@@ -2,7 +2,8 @@
 from django.conf import settings
 from django.core.files.storage import Storage
 from django.utils.encoding import force_unicode
-from gridfs import GridFS
+from gridfs import GridFS, NoFile
+from gridfs.grid_file import GridIn, GridOut
 from mongodj.db.base import get_connection_from_dict
 
 class GridFSStorage(Storage):
@@ -19,10 +20,18 @@ class GridFSStorage(Storage):
         return GridFS(conn[name])
 
     def open(self, name, mode='rb'):
-        if name is None:
-            name = content.name
         fs = self._get_fs()
-        file = fs.get_last_version(name)
+        if 'r' in mode:
+            try:
+                file = fs.get_last_version(name)
+            except NoFile:
+                file = fs.new_file(filename=name)
+                file.close()
+                file = fs.get_last_version(name)
+        elif 'w' in mode:
+            file = fs.new_file(filename=name)
+        else:
+            raise NotImplementedError()
         return file
 
     def save(self, name, content):
@@ -36,6 +45,7 @@ class GridFSStorage(Storage):
         fs = self._get_fs()
         file = fs.new_file(filename=name)
         file.write(content)
+        file.close()
         # Store filenames with forward slashes, even on Windows
         return force_unicode(name.replace('\\', '/'))
 

@@ -21,7 +21,12 @@ class Entry(models.Model):
     content = models.CharField(max_length=1000)
     date_published = models.DateTimeField()
     blog = StringForeignKey(Blog, null=True, blank=True)
-    afile = models.FileField(upload_to='whatever')
+    afile = models.FileField(upload_to='whatever', blank=True)
+
+    def has_file_content(self):
+        if self.afile and self.afile.read() is not None:
+            return "There is a file"
+        return "File empty"
     
     def __unicode__(self):
         return "Entry: %s" % (self.title)

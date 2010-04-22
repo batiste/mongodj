@@ -312,13 +312,24 @@ class MongoDjTest(TestCase):
 
         self.assertEqual(Session.objects.count(), 1)
 
-    def test_contrib_auth(self):
-        from django.contrib.auth.models import User
+    def test_gridfs_storage(self):
+        
+        from mongodj.db.storage import GridFSStorage
+        import StringIO
+        storage = GridFSStorage()
 
-        toto = User(username='toto')
-        toto.is_supersuser = True
-        toto.is_staff = True
-        toto.set_password('toto')
-        toto.save()
+        content = StringIO.StringIO("toto")
+        name = storage.save('test', content)
+        content_file = storage.open(name)
+        self.assertEqual(content_file.read(), "toto")
 
-        # test login
+        new_file = storage.open('test2')
+        self.assertEqual(new_file.read(), "")
+
+        content = StringIO.StringIO("toto")
+        new_file = storage.open('test3', mode="w")
+        new_file.write(content)
+        new_file.close()
+
+        file = storage.open('test3')
+        self.assertEqual(file.read(), "toto")
