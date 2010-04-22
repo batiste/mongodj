@@ -313,7 +313,7 @@ class MongoDjTest(TestCase):
 
     def test_gridfs_storage(self):
         
-        from mongodj.db.storage import GridFSStorage
+        from mongodj.storage import GridFSStorage
         import StringIO
         storage = GridFSStorage()
 
