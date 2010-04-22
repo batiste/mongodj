@@ -35,6 +35,53 @@ class DatabaseCreation(BaseDatabaseCreation):
     }
     
 
+    def sql_indexes_for_field(self, model, f, style):
+        opts = model._meta
+        col = getattr(self.connection.db_connection, opts.db_table)
+        if f.db_index:
+            direction = (getattr(f, "index_descending") and -1) or 1
+            col.ensure_index([(f.name, direction)], unique=f.unique)
+        return []
+
+    def index_fields_group(self, model, group, style):
+        if not isinstance(group, dict):
+            raise TypeError, "Indexes group has to be instance of dict"
+
+        fields = group.pop("fields")
+
+        if not isinstance(fields, list):
+            raise TypeError, "index_together fields has to be instance of list"
+
+        opts = model._meta
+        col = getattr(self.connection.db_connection, opts.db_table)
+        checked_fields = []
+        model_fields = [ f.name for f in opts.local_fields]
+
+        for field in fields:
+            field_name = field
+            direction = 1
+            if isinstance(field, (tuple,list)):
+                field_name = field[0]
+                direction = (field[1] and 1) or -1
+            if not field_name in model_fields:
+                raise FieldDoesNotExist('%s has no field named %r' % (opts.object_name, field_name))
+            checked_fields.append((field_name, direction))
+        col.ensure_index(checked_fields, **group)
+            
+    def sql_indexes_for_model(self, model, style):
+        "Returns the CREATE INDEX SQL statements for a single model"
+        if not model._meta.managed or model._meta.proxy:
+            return []
+        fields = [ f for f in model._meta.local_fields if f.db_index]
+        if not fields and not hasattr(model._meta, "index_together"):
+            return []
+        print "Installing index for %s.%s model" % (model._meta.app_label, model._meta.object_name)
+        for f in model._meta.local_fields:
+            self.sql_indexes_for_field(model, f, style)
+        for group in getattr(model._meta, "index_together", []):
+            self.index_fields_group(model, group, style)
+        return []
+
     def sql_create_model(self, model, style, known_models=set()):
         opts = model._meta
         kwargs = {}
