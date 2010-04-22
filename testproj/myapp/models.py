@@ -47,6 +47,10 @@ class StringForeignKey(models.ForeignKey):
 class Blog(models.Model):
 #    _id = StringAutoField(max_length=100, primary_key=True)
     title = models.CharField(max_length=200)
+
+    class Meta:
+        capped = True
+        collection_max = 25
     
     def __unicode__(self):
         return "Blog: %s" % self.title

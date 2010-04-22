@@ -1,8 +1,6 @@
 import datetime
 import sys
 
-from testproj.myapp.models import StringAutoField
-
 import pymongo
 from pymongo.objectid import ObjectId
 
@@ -205,13 +203,6 @@ class SQLInsertCompiler(SQLCompiler):
         # every object should have a unique pk
         pk_field = self.query.model._meta.pk
         pk_name = pk_field.attname
-        if not dat.has_key(pk_name):
-            if isinstance(pk_field, StringAutoField):
-                dat[pk_name] = str(ObjectId())
-#            else:
-#                # create a random, hopefully unique 64 bits value
-#                import random
-#                dat[pk_name] = str(random.getrandbits(64))
         if pk_name=='id' and pk_name in dat and type(pk_field).__name__ =="AutoField":
             pk = dat.pop(pk_name)
             if isinstance(pk, (str, unicode)):

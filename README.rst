@@ -36,7 +36,8 @@ TODO (ramdom order):
 	- geofield
 	- set field
 	- special manager for complex query (map/reduce)
-
+	- Master and Slave support
+	- more testing
 
 Settings configuration
 ----------------------

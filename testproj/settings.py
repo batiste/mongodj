@@ -18,7 +18,7 @@ DATABASES = {
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     },
-    'mongodb': {
+    'mongodj': {
         'ENGINE': 'mongodj',
         'NAME': 'test',
         'USER': '',
@@ -107,4 +107,4 @@ INSTALLED_APPS = (
 DATABASE_ROUTERS = ['mongodj.router.MongoDBRouter']
 MONGODB_MANAGED_APPS = ['testproj.myapp', ]
 
-SOUTH_DATABASE_ADAPTERS = { "mongodb" : "mongodj.south"}
+SOUTH_DATABASE_ADAPTERS = { "mongodj" : "mongodj.south"}
