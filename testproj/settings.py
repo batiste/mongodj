@@ -20,7 +20,7 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     },
     'mongodb': {
-        'ENGINE': 'mongodj.db',
+        'ENGINE': 'mongodj',
         'NAME': 'test',
         'USER': '',
         'PASSWORD': '',
@@ -102,13 +102,16 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'testproj.myapp',
-    
+    'south',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
 )
 
-DATABASE_ROUTERS = ['mongodj.db.router.MongoDBRouter']
-MONGODB_MANAGED_APPS = ['testproj.myapp', 'django.contrib.sessions']
+DATABASE_ROUTERS = ['mongodj.router.MongoDBRouter']
+MONGODB_MANAGED_APPS = ['testproj.myapp', ]
+
+SOUTH_DATABASE_ADAPTERS = { "mongodb" : "mongodj.south"}
 
 DEFAULT_FILE_STORAGE = 'mongodj.db.storage.GridFSStorage'
 MONGODB_FILE_STORAGE_DATABASE = DATABASES['mongodb']
+

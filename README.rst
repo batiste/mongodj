@@ -23,6 +23,7 @@ Features:
 * SQL model management
 * Routing on mongodb of some apps
 * Gridfs storage backend
+* South support
 
 Extra fields:
 
@@ -41,6 +42,7 @@ TODO (ramdom order):
 Settings configuration
 ----------------------
 
+
 Set up database with Rel and not rel database::
 
     DATABASES = {
@@ -53,7 +55,7 @@ Set up database with Rel and not rel database::
             'PORT': '',
         },
         'mongodb': {
-            'ENGINE': 'mongodj.db',
+            'ENGINE': 'mongodj',
             'NAME': 'test',
             'USER': '',
             'PASSWORD': '',
@@ -63,16 +65,26 @@ Set up database with Rel and not rel database::
         },
     }
 
+
 in INSTALLED_APPS 'django.contrib.contenttypes' is required.
 
 Activate routing adding::
 
-    DATABASE_ROUTERS = ['mongodj.db.router.MongoDBRouter']
+
+    DATABASE_ROUTERS = ['mongodj.router.MongoDBRouter']
 
 
 Select apps that you want manage in mongodb::
 
     MONGODB_MANAGED_APPS = ['testproj.myapp', ]
+
+
+South Support
+-------------
+
+Add this line to settings.py to make south happy to use mongodj.
+
+SOUTH_DATABASE_ADAPTERS = { "mongodb" : "mongodj.south"}
 
 
 Extra

@@ -23,6 +23,7 @@ def decode_django(data):
         del data['_type']
         del data['_app']
         del data['_model']
+        data.pop('_id', None)
         data = dict([(str(k),v) for k,v in data.items()])
         return model.model_class()(**data)
 
@@ -46,6 +47,9 @@ class TransformDjango(SONManipulator):
     
     def transform_outgoing(self, son, collection):
         if isinstance(son, dict):
+            if "_id" in son:
+                pk = son.pop('_id')
+                son['id'] = unicode(pk)
             if "_type" in son and son["_type"] in [u"django", u'emb']:
                 son = decode_django(son)
             else:

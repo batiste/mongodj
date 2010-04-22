@@ -2,7 +2,7 @@ from django.db.backends import BaseDatabaseOperations
 from pymongo.objectid import ObjectId
 
 class DatabaseOperations(BaseDatabaseOperations):
-    compiler_module = 'mongodj.db.compiler'
+    compiler_module = 'mongodj.compiler'
 
     def __init__(self, database_wrapper):
         super(DatabaseOperations, self).__init__()

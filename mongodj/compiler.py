@@ -1,7 +1,7 @@
 import datetime
 import sys
 
-from testproj.myapp.models import StringAutoField
+#from testproj.myapp.models import StringAutoField
 
 import pymongo
 from pymongo.objectid import ObjectId
@@ -135,7 +135,13 @@ class SQLCompiler(SQLCompiler):
             if isinstance(child, (list, tuple)):
                 lookup_type, collection, column, db_type, value = \
                     _parse_constraint(child, self.connection)
-                query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
+                if column in ['id', "pk"]:
+                    if lookup_type=="exact":
+                        query["_id"] = value
+                    elif lookup_type=="in":
+                        query["_id"] = {"$in":value}
+                else:
+                    query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
             elif isinstance(child, WhereNode):
                 query = self._get_query_recursif(query=query, where=child)
         return query
@@ -218,27 +224,40 @@ class SQLInsertCompiler(SQLCompiler):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
 
         # every object should have a unique pk, (is it always the case in Django?)
-        if not dat.has_key(pk_column):
-            if isinstance(pk_field, (models.CharField, StringAutoField)):
-                dat['_id'] = str(ObjectId())
-            # TODO: I assume that it's a int there... It's not correct
+        pk_field = self.query.model._meta.pk
+        pk_name = pk_field.attname
+        if type(pk_field).__name__ =="AutoField":
+            if not dat.has_key(pk_name):
+                pk = ObjectId()
             else:
-                #create a random int to satisfy the primary key
-                import random
-                dat['_id'] = str(random.getrandbits(64))
-        else:
-            # copy the primary key into the mongodb unique id field
-            dat['_id'] = dat[pk_column]
-            del dat[pk_column]
-        
-        self.connection._cursor()[self.query.get_meta().db_table].save(dat)
+                pk = dat.pop(pk_name)
+                #if isinstance(pk, (str, unicode)):
+                pk = ObjectId(pk)
+            dat['_id'] = pk
+                
+        res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:
-            return dat['_id']
+            return unicode(res)
 
 class SQLUpdateCompiler(SQLCompiler):
-    upsert = True
 
+    def execute_sql(self, return_id=False):
+        """
+        self.query - the data that should be inserted
+        """
+        dat = {}
+        for (field, value), column in zip(self.query.values, self.query.columns):
+            dat[column] = python2db(field.db_type(connection=self.connection), value)
+        # every object should have a unique pk
+        pk_field = self.query.model._meta.pk
+        pk_name = pk_field.attname
+                
+        res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
+
+        if return_id:
+            return unicode(res)
+        
 class SQLDeleteCompiler(SQLCompiler):
     def execute_sql(self, result_type=MULTI):
         query = self._get_query()
