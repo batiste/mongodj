@@ -18,61 +18,61 @@ Some fields types are imported from mongoengine.
 
 Features:
 
-	- multidb (use a mixin of SQL and NotSQL DB)
-	- Embdedded model management
-	- SQL model management
-	- Routing on mongodb of some apps
+* Multidb (use a mixin of SQL and NotSQL DB)
+* Embdedded model management
+* SQL model management
+* Routing on mongodb of some apps
+* Gridfs storage backend
 
 Extra fields:
 
-	- Dictionary Field
-	- List Field
-	- Sorted List Field	
+* Dictionary Field
+* List Field
+* Sorted List Field
 
 TODO (ramdom order):
 
-	- south support
-	- gridfs
-	- geofield
-	- set field
-	- special manager for complex query (map/reduce)
+* south support
+* geofield
+* set field
+* special manager for complex query (map/reduce)
 
 
 Settings configuration
 ----------------------
 
-Set up database with Rel and not rel database.
+Set up database with Rel and not rel database::
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'test.db',                     
-        'USER': '',                     
-        'PASSWORD': '',                  
-        'HOST': '',                     
-        'PORT': '',                     
-    },
-    'mongodb': {
-        'ENGINE': 'mongodj.db',
-        'NAME': 'test',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '27017',
-        'SUPPORTS_TRANSACTIONS': False,
-    },
-}
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'test.db',
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+        },
+        'mongodb': {
+            'ENGINE': 'mongodj.db',
+            'NAME': 'test',
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': 'localhost',
+            'PORT': '27017',
+            'SUPPORTS_TRANSACTIONS': False,
+        },
+    }
 
 in INSTALLED_APPS 'django.contrib.contenttypes' is required.
 
 Activate routing adding::
 
-	DATABASE_ROUTERS = ['mongodj.db.router.MongoDBRouter']
+    DATABASE_ROUTERS = ['mongodj.db.router.MongoDBRouter']
 
 
 Select apps that you want manage in mongodb::
 
-	MONGODB_MANAGED_APPS = ['testproj.myapp', ]
+    MONGODB_MANAGED_APPS = ['testproj.myapp', ]
 
 
 Extra
