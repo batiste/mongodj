@@ -12,19 +12,22 @@ class EmbeddedModel(models.Model):
     _embedded_in =None
     
     def save(self, *args, **kwargs):
+        if self.pk is None:
+            self.pk = ObjectId()
         if self._embedded_in  is None:
             raise RuntimeError("Invalid save")
         self._embedded_in.save()
 
     def serialize(self):
+        if self.pk is None:
+            self.pk = ObjectId()
         result = {'_app':self._meta.app_label, 
             '_model':self._meta.module_name,
-            'pk':self.pk}
+            '_id':self.pk}
         for field in self._meta.fields:
             result[field.attname] = getattr(self, field.attname)
         return result
     
-
 class ListField(Field):
     """A list field that wraps a standard field, allowing multiple instances
     of the field to be used as a list in the database.
