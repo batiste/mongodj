@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from mongodj.db.fields import ListField, SortedListField, DictField
-from mongodj.db.fields import SetListField, EmbeddedModel
+from mongodj.fields import ListField, SortedListField, DictField
+from mongodj.fields import SetListField, EmbeddedModel
 
 
 class Blog(models.Model):
