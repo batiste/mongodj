@@ -7,6 +7,10 @@ from mongodj.fields import SetListField, EmbeddedModel
 class Blog(models.Model):
 
     title = models.CharField(max_length=200)
+
+    class Meta:
+        capped = True
+        collection_max = 25
     
     def __unicode__(self):
         return "Blog: %s" % self.title

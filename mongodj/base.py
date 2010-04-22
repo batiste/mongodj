@@ -27,7 +27,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         Show defined models
         """
-        return self.django_table_names()
+        return self.connection.db_connection.collection_names()
 
     def sequence_list(self):
         # TODO: check if it's necessary to implement that

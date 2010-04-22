@@ -1,8 +1,6 @@
 import datetime
 import sys
 
-#from testproj.myapp.models import StringAutoField
-
 import pymongo
 from pymongo.objectid import ObjectId
 
@@ -226,12 +224,10 @@ class SQLInsertCompiler(SQLCompiler):
         # every object should have a unique pk, (is it always the case in Django?)
         pk_field = self.query.model._meta.pk
         pk_name = pk_field.attname
-        if type(pk_field).__name__ =="AutoField":
-            if not dat.has_key(pk_name):
-                pk = ObjectId()
-            else:
-                pk = dat.pop(pk_name)
-                #if isinstance(pk, (str, unicode)):
+        
+        if pk_name=='id' and pk_name in dat and type(pk_field).__name__ =="AutoField":
+            pk = dat.pop(pk_name)
+            if isinstance(pk, (str, unicode)):
                 pk = ObjectId(pk)
             dat['_id'] = pk
                 

@@ -6,9 +6,11 @@ class MongoDBRouter(object):
         from django.conf import settings
         self.managed_apps = [app.split('.')[-1] for app in getattr(settings, "MONGODB_MANAGED_APPS", [])]
         self.mongodb_database = None
+        self.mongodb_databases = []
         for name, databaseopt in settings.DATABASES.items():
             if databaseopt["ENGINE"]=='mongodj':
                 self.mongodb_database = name
+                self.mongodb_databases.append(name)
         if self.mongodb_database is None:
             raise RuntimeError("A mongodb database must be set")
 
@@ -32,9 +34,10 @@ class MongoDBRouter(object):
 
     def allow_syncdb(self, db, model):
         "Make sure that a mongodb model appears on a mongodb database"
-        if db == self.mongodb_database:
+        if db in self.mongodb_databases:
             return model._meta.app_label  in self.managed_apps
         elif model._meta.app_label in self.managed_apps:
             return False
         return None
+
         

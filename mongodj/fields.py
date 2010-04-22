@@ -13,14 +13,15 @@ class EmbeddedModel(models.Model):
     
     def save(self, *args, **kwargs):
         if self.pk is None:
-            self.pk = ObjectId()
+            self.pk = unicode(ObjectId())
         if self._embedded_in  is None:
             raise RuntimeError("Invalid save")
         self._embedded_in.save()
 
     def serialize(self):
         if self.pk is None:
-            self.pk = ObjectId()
+            self.pk = unicode(ObjectId())
+            self.id = self.pk
         result = {'_app':self._meta.app_label, 
             '_model':self._meta.module_name,
             '_id':self.pk}
@@ -240,7 +241,7 @@ def fix_autofield(sender, **kwargs):
     Fix autofield
     """
     cls = sender
-    if isinstance(cls._meta.pk, DJAutoField):
+    if cls.objects.db =="mongodj" and isinstance(cls._meta.pk, DJAutoField):
         pk = cls._meta.pk
         setattr(pk, "to_python", autofield_to_python)
         setattr(pk, "get_prep_value", autofield_get_prep_value)

@@ -33,10 +33,11 @@ Extra fields:
 
 TODO (ramdom order):
 
-* south support
 * geofield
 * set field
 * special manager for complex query (map/reduce)
+* Master and Slave support
+* more testing
 
 
 Settings configuration
