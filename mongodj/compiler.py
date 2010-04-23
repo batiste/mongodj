@@ -87,8 +87,7 @@ def _parse_constraint(where_child, connection):
             value = value[1:]
     elif lookup_type in ['icontains', 'contains']:
         value = value[1:-1]
-    
-#    print (lookup_type, table_alias, column, db_type, value) #very useful for fast debugging
+
     return (lookup_type, table_alias, column, db_type, value)
 
 class SQLCompiler(SQLCompiler):
@@ -134,10 +133,10 @@ class SQLCompiler(SQLCompiler):
             if isinstance(child, (list, tuple)):
                 lookup_type, collection, column, db_type, value = \
                     _parse_constraint(child, self.connection)
-                if column in ['id', "pk"]:
-                    if lookup_type=="exact":
+                if column in ['id', 'pk']:
+                    if lookup_type=='exact':
                         query["_id"] = value
-                    elif lookup_type=="in":
+                    elif lookup_type=='in':
                         query["_id"] = {"$in":value}
                 else:
                     query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
@@ -224,7 +223,7 @@ class SQLInsertCompiler(SQLCompiler):
         pk_field = self.query.model._meta.pk
         pk_name = pk_field.attname
         
-        if pk_name=='id' and pk_name in dat and type(pk_field).__name__ =="AutoField":
+        if pk_name in dat and type(pk_field).__name__ =="AutoField":
             pk = dat.pop(pk_name)
             if isinstance(pk, (str, unicode)):
                 pk = ObjectId(pk)
@@ -247,7 +246,7 @@ class SQLUpdateCompiler(SQLCompiler):
         # every object should have a unique pk
         pk_field = self.query.model._meta.pk
         pk_name = pk_field.attname
-                
+
         res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
 
         if return_id:

@@ -108,7 +108,7 @@ INSTALLED_APPS = (
 )
 
 DATABASE_ROUTERS = ['mongodj.router.MongoDBRouter']
-MONGODB_MANAGED_APPS = ['testproj.myapp', ]
+MONGODB_MANAGED_APPS = ['testproj.myapp', 'django.contrib.sessions']
 
 
 DEFAULT_FILE_STORAGE = 'mongodj.db.storage.GridFSStorage'
