@@ -19,7 +19,8 @@ from django.conf import settings
 
 TYPE_MAPPING = {
     'unicode':  lambda val: unicode(val),
-    'int':      lambda val: int(val),
+    # mongodb doesn't handle number anyway
+    #'int':      lambda val: int(val),
     'float':    lambda val: float(val),
     'bool':     lambda val: bool(val),
     'objectid': lambda val: val,
@@ -215,8 +216,6 @@ class SQLInsertCompiler(SQLCompiler):
         self.query - the data that should be inserted
         """
         dat = {}
-        pk_field = self.query.get_meta().pk
-        pk_column = self.query.get_meta().pk.column
         
         for (field, value), column in zip(self.query.values, self.query.columns):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
