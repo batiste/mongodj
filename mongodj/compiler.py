@@ -222,8 +222,8 @@ class SQLInsertCompiler(SQLCompiler):
         # every object should have a unique pk, (is it always the case in Django?)
         pk_field = self.query.model._meta.pk
         pk_name = pk_field.attname
-        
-        if pk_name in dat and type(pk_field).__name__ =="AutoField":
+
+        if pk_name in dat:
             pk = dat.pop(pk_name)
             if isinstance(pk, (str, unicode)):
                 pk = ObjectId(pk)
