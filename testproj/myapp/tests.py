@@ -274,7 +274,11 @@ class MongoDjTest(TestCase):
         self.assertEqual(Session.objects.count(), 1)
         session.expire_date = datetime.datetime.now()
         self.assertEqual(Session.objects.count(), 1)
-        Session.objects.all().delete()
+
+    def test_session_backend_delete(self):
+        from django.contrib.sessions.backends.db import SessionStore
+        from django.contrib.sessions.models import Session
+        from pymongo.objectid import ObjectId
 
         store = SessionStore()
         self.assertFalse(store.exists('toto'))

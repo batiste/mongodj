@@ -3,6 +3,7 @@ import sys
 
 import pymongo
 from pymongo.objectid import ObjectId
+from pymongo.errors import InvalidId
 
 from django.db import models
 from django.db.models.sql import aggregates as sqlaggregates
@@ -227,7 +228,14 @@ class SQLInsertCompiler(SQLCompiler):
         if pk_name in dat:
             pk = dat.pop(pk_name)
             if isinstance(pk, (str, unicode)):
-                pk = ObjectId(pk)
+                try:
+                    pk = ObjectId(pk)
+                except InvalidId:
+                    # http://www.mongodb.org/display/DOCS/Object+IDs
+                    # Users are welcome to use their own conventions
+                    # for creating ids; the _id value may be of any type
+                    # so long as it is a unique.
+                    pass
             dat['_id'] = pk
                 
         res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
@@ -254,6 +262,8 @@ class SQLUpdateCompiler(SQLCompiler):
             return unicode(res)
         
 class SQLDeleteCompiler(SQLCompiler):
+    
     def execute_sql(self, result_type=MULTI):
         query = self._get_query()
         return self._get_collection().remove(query)
+        
