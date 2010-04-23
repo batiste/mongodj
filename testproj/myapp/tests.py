@@ -313,62 +313,62 @@ class MongoDjTest(TestCase):
         self.assertEqual(file.read(), "toto")
 
 
-#    def test_simple_foreign_keys(self):
-#        now = datetime.datetime.now()
-#
-#        blog1 = Blog(title="Blog")
-#        blog1.save()
-#        entry1 = Entry(title="entry 1", blog=blog1)
-#        entry1.save()
-#        entry2 = Entry(title="entry 2", blog=blog1)
-#        entry2.save()
-#        self.assertEqual(Entry.objects.count(), 2)
-#
-#        for entry in Entry.objects.all():
-#            self.assertEqual(
-#                blog1,
-#                entry.blog
-#            )
-#
-#        blog2 = Blog(title="Blog")
-#        blog2.save()
-#        entry3 = Entry(title="entry 3", blog=blog2)
-#        entry3.save()
-#        self.assertEqual(
-#            # it's' necessary to explicitly state the pk here
-#            list(Entry.objects.filter(blog=blog1.pk)),
-#            [entry1, entry2]
-#        )
-#        
-#
-#    def test_foreign_keys_bug(self):
-#        blog1 = Blog(title="Blog")
-#        blog1.save()
-#        entry1 = Entry(title="entry 1", blog=blog1)
-#        entry1.save()
-#        self.assertEqual(
-#            # this should work too
-#            list(Entry.objects.filter(blog=blog1)),
-#            [entry1]
-#        )
-#
-#    def test_standard_autofield(self):
-#
-#        sam1 = StandardAutoFieldModel(title="title 1")
-#        sam1.save()
-#        sam2 = StandardAutoFieldModel(title="title 2")
-#        sam2.save()
-#
-#        self.assertEqual(
-#            StandardAutoFieldModel.objects.count(),
-#            2
-#        )
-#
-#        sam1_query = StandardAutoFieldModel.objects.get(title="title 1")
-#        self.assertEqual(
-#            sam1_query.pk,
-#            sam1.pk
-#        )
-#
-#        sam1_query = StandardAutoFieldModel.objects.get(pk=sam1.pk)
+    def test_simple_foreign_keys(self):
+        now = datetime.datetime.now()
+
+        blog1 = Blog(title="Blog")
+        blog1.save()
+        entry1 = Entry(title="entry 1", blog=blog1)
+        entry1.save()
+        entry2 = Entry(title="entry 2", blog=blog1)
+        entry2.save()
+        self.assertEqual(Entry.objects.count(), 2)
+
+        for entry in Entry.objects.all():
+            self.assertEqual(
+                blog1,
+                entry.blog
+            )
+
+        blog2 = Blog(title="Blog")
+        blog2.save()
+        entry3 = Entry(title="entry 3", blog=blog2)
+        entry3.save()
+        self.assertEqual(
+            # it's' necessary to explicitly state the pk here
+            list(Entry.objects.filter(blog=blog1.pk)),
+            [entry1, entry2]
+        )
+        
+
+    def test_foreign_keys_bug(self):
+        blog1 = Blog(title="Blog")
+        blog1.save()
+        entry1 = Entry(title="entry 1", blog=blog1)
+        entry1.save()
+        self.assertEqual(
+            # this should work too
+            list(Entry.objects.filter(blog=blog1)),
+            [entry1]
+        )
+
+    def test_standard_autofield(self):
+
+        sam1 = StandardAutoFieldModel(title="title 1")
+        sam1.save()
+        sam2 = StandardAutoFieldModel(title="title 2")
+        sam2.save()
+
+        self.assertEqual(
+            StandardAutoFieldModel.objects.count(),
+            2
+        )
+
+        sam1_query = StandardAutoFieldModel.objects.get(title="title 1")
+        self.assertEqual(
+            sam1_query.pk,
+            sam1.pk
+        )
+
+        sam1_query = StandardAutoFieldModel.objects.get(pk=sam1.pk)
 

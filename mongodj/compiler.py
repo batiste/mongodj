@@ -118,22 +118,22 @@ class SQLCompiler(SQLCompiler):
     def _get_query(self):
         query = {}
         where = self.query.where
-        query = self._get_query_recursif(query=query, where=where)
         pk_column = self.query.get_meta().pk.column
+        query = self._get_query_recursif(query=query, where=where, pk_column=pk_column)
         # if we have a _id, we need to put back the value into the pk_column
         if query.has_key(pk_column):
             query['_id'] = query[pk_column]
             del query[pk_column]
         return query
 
-    def _get_query_recursif(self, query, where):
+    def _get_query_recursif(self, query, where, pk_column):
         if where.connector == OR:
             raise NotImplementedError("OR queries not supported yet.")
         for child in where.children:
             if isinstance(child, (list, tuple)):
                 lookup_type, collection, column, db_type, value = \
                     _parse_constraint(child, self.connection)
-                if column in ['id', 'pk']:
+                if column == pk_column:
                     if lookup_type=='exact':
                         query["_id"] = value
                     elif lookup_type=='in':
@@ -141,11 +141,12 @@ class SQLCompiler(SQLCompiler):
                 else:
                     query[column] = OPERATORS_MAP[lookup_type](python2db(db_type, value))
             elif isinstance(child, WhereNode):
-                query = self._get_query_recursif(query=query, where=child)
+                query = self._get_query_recursif(query=query, where=child,
+                    pk_column=pk_column)
         return query
     
     def _get_collection(self):
-        _collection = self.query.model._meta.db_table
+        _collection = self.query.get_meta().db_table
         return self.cursor()[_collection]
         
     """
@@ -220,7 +221,7 @@ class SQLInsertCompiler(SQLCompiler):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
 
         # every object should have a unique pk, (is it always the case in Django?)
-        pk_field = self.query.model._meta.pk
+        pk_field = self.query.get_meta().pk
         pk_name = pk_field.attname
 
         if pk_name in dat:
@@ -244,7 +245,7 @@ class SQLUpdateCompiler(SQLCompiler):
         for (field, value), column in zip(self.query.values, self.query.columns):
             dat[column] = python2db(field.db_type(connection=self.connection), value)
         # every object should have a unique pk
-        pk_field = self.query.model._meta.pk
+        pk_field = self.query.get_meta().pk
         pk_name = pk_field.attname
 
         res = self.connection._cursor()[self.query.get_meta().db_table].save(dat)
